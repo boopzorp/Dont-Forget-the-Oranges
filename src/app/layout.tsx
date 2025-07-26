@@ -1,13 +1,12 @@
 import type {Metadata} from 'next';
 import { Toaster } from "@/components/ui/toaster"
-import { PT_Sans, Nanum_Pen_Script } from 'next/font/google'
+import { Inter, Nanum_Pen_Script } from 'next/font/google'
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/hooks/use-auth";
 import './globals.css';
 
-const ptSans = PT_Sans({ 
+const inter = Inter({ 
   subsets: ['latin'],
-  weight: ['400', '700'],
   variable: '--font-sans',
 })
 
@@ -29,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${ptSans.variable} ${nanumPenScript.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${nanumPenScript.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
