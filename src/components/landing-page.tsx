@@ -80,7 +80,7 @@ export function LandingPage() {
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             <Image 
-              src="https://placehold.co/1200x600.png"
+              src="/my-banner.png"
               alt="App Screenshot"
               width={1200}
               height={600}
