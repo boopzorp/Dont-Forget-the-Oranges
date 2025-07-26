@@ -62,8 +62,12 @@ const eventFromFirestore = (snapshot: any): ShoppingEvent => {
 };
 
 const giftToFirestore = (gift: Omit<GiftItem, 'id'> | GiftItem) => ({
-    ...gift,
+    name: gift.name,
+    recipient: gift.recipient,
+    price: gift.price,
     purchaseDate: Timestamp.fromDate(gift.purchaseDate),
+    forEventId: gift.forEventId || '',
+    notes: gift.notes || '',
 });
 
 const giftFromFirestore = (snapshot: any): GiftItem => {
