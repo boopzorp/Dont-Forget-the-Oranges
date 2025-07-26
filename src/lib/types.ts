@@ -16,7 +16,7 @@ export type GroceryItem = {
   quantity: number;
   orderHistory: Order[];
   status: StockStatus;
-  price: number; // Represents the latest price
+  price: number; // Represents the latest price per unit
   defaultGroup?: string;
 };
 

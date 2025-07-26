@@ -213,9 +213,10 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 ...existingItem,
                 status: 'In Stock' as StockStatus,
                 price: matchingExtractedItem.price ?? existingItem.price,
+                quantity: (existingItem.quantity || 1) + (matchingExtractedItem.quantity || 1) -1, // Simple addition for now
                 orderHistory: [
                     ...existingItem.orderHistory,
-                    { date: purchaseDate, price: matchingExtractedItem.price ?? existingItem.price, group, quantity: 1 },
+                    { date: purchaseDate, price: matchingExtractedItem.price ?? existingItem.price, group, quantity: matchingExtractedItem.quantity || 1 },
                 ],
             };
             promises.push(updateItem(user.uid, updated));
@@ -232,9 +233,9 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
               name: item.name,
               category: item.category,
               price: item.price ?? 0,
-              quantity: 1,
+              quantity: item.quantity || 1,
               status: 'In Stock',
-              orderHistory: [{ date: purchaseDate, price: item.price ?? 0, group, quantity: 1 }],
+              orderHistory: [{ date: purchaseDate, price: item.price ?? 0, group, quantity: item.quantity || 1 }],
               defaultGroup: group,
           };
       });
