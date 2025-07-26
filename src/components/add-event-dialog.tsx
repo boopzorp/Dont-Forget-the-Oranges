@@ -137,7 +137,7 @@ export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] theme-gifts">
         <DialogHeader>
           <DialogTitle>{eventToEdit ? 'Edit Event' : 'Add New Event'}</DialogTitle>
           <DialogDescription>
@@ -167,7 +167,7 @@ export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }:
                         <FormItem>
                             <FormLabel>Icon</FormLabel>
                             <FormControl>
-                                <Input placeholder="🎉" className="w-16 text-center text-2xl p-0 h-10" {...field} />
+                                <Input placeholder="🎉" className="w-16 text-center text-2xl p-0 h-10" {...field} value={field.value ?? ''} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -264,7 +264,7 @@ export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }:
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="e.g., She loves chocolate and books." {...field} />
+                    <Textarea placeholder="e.g., She loves chocolate and books." {...field} value={field.value ?? ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

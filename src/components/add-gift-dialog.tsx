@@ -95,7 +95,7 @@ export function AddGiftDialog({ onConfirm, giftToEdit, isOpen, onOpenChange, eve
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] theme-gifts">
         <DialogHeader>
           <DialogTitle>{giftToEdit ? 'Edit Gift' : 'Add New Gift'}</DialogTitle>
           <DialogDescription>
