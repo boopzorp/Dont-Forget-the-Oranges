@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { MoreHorizontal, PlusCircle, Upload, Loader2 } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Upload, Loader2, LogOut } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { GroceryItem, Category, StockStatus, Currency } from "@/lib/types";
@@ -33,12 +32,15 @@ import { ConfirmPurchaseDialog } from "./confirm-purchase-dialog";
 import { extractGroceriesFromImage, ExtractedGroceryItem } from "@/ai/flows/extract-groceries-flow";
 import { ThemeToggleButton } from "./theme-toggle-button";
 import { Logo } from "./logo";
+import { useAuth } from "@/hooks/use-auth";
+import { addItem, updateItem, deleteItem } from "@/lib/firebase/firestore";
 
 interface GroceryDashboardProps {
   initialItems: GroceryItem[];
 }
 
 export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
+  const { user, signOut } = useAuth();
   const [items, setItems] = React.useState<GroceryItem[]>(initialItems);
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = React.useState(false);
   const [editingItem, setEditingItem] = React.useState<GroceryItem | undefined>(undefined);
@@ -52,67 +54,65 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const handleItemAction = (itemData: Omit<GroceryItem, 'id' | 'orderHistory'> & { id?: string }) => {
+  React.useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
+
+  const handleItemAction = async (itemData: Omit<GroceryItem, 'id' | 'orderHistory'> & { id?: string }) => {
+    if (!user) return;
     if (itemData.id) {
-      // Update
-      setItems(items.map((i) => {
-        if (i.id === itemData.id) {
-          const updatedItem = { ...i, ...itemData };
-          // If price changed, add to history
-          if (i.price !== updatedItem.price || i.orderHistory.length === 0) {
-            updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price}]
-          }
-          return updatedItem;
-        }
-        return i;
-      }));
+      const existingItem = items.find(i => i.id === itemData.id);
+      if (!existingItem) return;
+
+      const updatedItem: GroceryItem = { ...existingItem, ...itemData };
+      if (existingItem.price !== updatedItem.price || existingItem.orderHistory.length === 0) {
+        updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price}];
+      }
+      await updateItem(user.uid, updatedItem);
     } else {
-      // Add
-      const newItem: GroceryItem = { 
+      const newItem: Omit<GroceryItem, 'id'> = { 
         ...itemData, 
-        id: new Date().toISOString(),
         orderHistory: [{date: new Date(), price: itemData.price}]
       };
-      setItems([newItem, ...items]);
+      await addItem(user.uid, newItem);
     }
   };
 
-  const handleDeleteItem = (itemId: string, fromShoppingList: boolean) => {
-    const itemToUpdate = items.find(item => item.id === itemId);
-    if (itemToUpdate) {
+  const handleDeleteItem = async (itemId: string, fromShoppingList: boolean) => {
+    if (!user) return;
+    const itemToDelete = items.find(item => item.id === itemId);
+    if (itemToDelete) {
       if (fromShoppingList) {
-        handleStatusChange(itemId, "Don't Need");
+        await handleStatusChange(itemId, "Don't Need");
         toast({
           title: "Item Removed",
-          description: `${itemToUpdate.name} has been moved to "Don't Need".`
+          description: `${itemToDelete.name} has been moved to "Don't Need".`
         });
       } else {
-        setItems(items.filter((i) => i.id !== itemId));
+        await deleteItem(user.uid, itemId);
         toast({
           title: "Item Deleted",
-          description: `${itemToUpdate.name} has been permanently removed.`,
+          description: `${itemToDelete.name} has been permanently removed.`,
           variant: "destructive"
         });
       }
     }
   };
 
-  const handleStatusChange = (itemId: string, status: StockStatus) => {
-    setItems(items.map(i => {
-        if (i.id === itemId) {
-            const updatedItem = { ...i, status };
-            // If item is moved to "In Stock" from "Need to Order", add a new order history record
-            if (status === 'In Stock' && i.status === 'Need to Order') {
-                updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price}];
-                toast({
-                    title: "Item Stocked",
-                    description: `${i.name} marked as "In Stock" and purchase recorded.`,
-                });
-            }
-            return updatedItem;
+  const handleStatusChange = async (itemId: string, status: StockStatus) => {
+    if (!user) return;
+    const itemToUpdate = items.find(i => i.id === itemId);
+    if (itemToUpdate) {
+        const updatedItem = { ...itemToUpdate, status };
+        if (status === 'In Stock' && itemToUpdate.status === 'Need to Order') {
+            updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price}];
+            toast({
+                title: "Item Stocked",
+                description: `${itemToUpdate.name} marked as "In Stock" and purchase recorded.`,
+            });
         }
-        return i;
-    }));
+        await updateItem(user.uid, updatedItem);
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,18 +170,24 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     reader.readAsDataURL(file);
   };
   
-  const handleConfirmPurchase = (purchaseDate: Date) => {
+  const handleConfirmPurchase = async (purchaseDate: Date) => {
+    if (!user) return;
+
+    const promises: Promise<any>[] = [];
+
     let updatedItemsCount = 0;
     let newItemsCount = 0;
 
-    const updatedItems = items.map(existingItem => {
+    const existingItemsToUpdate: GroceryItem[] = [];
+    
+    items.forEach(existingItem => {
         const matchingExtractedItem = extractedItemsPendingConfirmation.find(
             (extracted) => extracted.name.toLowerCase() === existingItem.name.toLowerCase()
         );
 
         if (matchingExtractedItem) {
             updatedItemsCount++;
-            return {
+            const updated = {
                 ...existingItem,
                 status: 'In Stock' as StockStatus,
                 price: matchingExtractedItem.price ?? existingItem.price,
@@ -190,28 +196,31 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                     { date: purchaseDate, price: matchingExtractedItem.price ?? existingItem.price },
                 ],
             };
+            promises.push(updateItem(user.uid, updated));
         }
-        return existingItem;
     });
+    
+    const newItemsToAdd: Omit<GroceryItem, 'id'>[] = extractedItemsPendingConfirmation
+      .filter(extractedItem => 
+          !items.some(existingItem => existingItem.name.toLowerCase() === extractedItem.name.toLowerCase())
+      )
+      .map((item: ExtractedGroceryItem) => {
+          newItemsCount++;
+          return {
+              name: item.name,
+              category: item.category,
+              price: item.price ?? 0,
+              quantity: 1,
+              status: 'In Stock',
+              orderHistory: [{ date: purchaseDate, price: item.price ?? 0 }],
+          };
+      });
 
-    const newItems: GroceryItem[] = extractedItemsPendingConfirmation
-        .filter(extractedItem => 
-            !items.some(existingItem => existingItem.name.toLowerCase() === extractedItem.name.toLowerCase())
-        )
-        .map((item: ExtractedGroceryItem) => {
-            newItemsCount++;
-            return {
-                id: new Date().toISOString() + Math.random(),
-                name: item.name,
-                category: item.category,
-                price: item.price ?? 0,
-                quantity: 1,
-                status: 'In Stock',
-                orderHistory: [{ date: purchaseDate, price: item.price ?? 0 }],
-            };
-        });
-
-    setItems([...updatedItems, ...newItems]);
+    newItemsToAdd.forEach(newItem => {
+        promises.push(addItem(user.uid, newItem));
+    });
+    
+    await Promise.all(promises);
 
     toast({
         title: "Success!",
@@ -219,7 +228,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     });
     setExtractedItemsPendingConfirmation([]);
     setIsConfirmPurchaseDialogOpen(false);
-};
+  };
 
 
   const shoppingList = items.filter((item) => item.status === "Need to Order");
@@ -264,7 +273,6 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         onOpenChange={setIsAddItemDialogOpen}
         currency={currency}
       >
-        {/* Empty child to use this as a controlled dialog */}
         <div/>
       </AddItemDialog>
       <ConfirmPurchaseDialog
@@ -308,6 +316,9 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 <span className="hidden md:inline">Add Item</span>
           </Button>
           <ThemeToggleButton />
+          <Button variant="ghost" size="icon" onClick={signOut}>
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </header>
 

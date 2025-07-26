@@ -1,10 +1,15 @@
 import type {Metadata} from 'next';
 import { Toaster } from "@/components/ui/toaster"
-import { Inter } from 'next/font/google'
+import { PT_Sans } from 'next/font/google'
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/hooks/use-auth";
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] })
+const ptSans = PT_Sans({ 
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-sans',
+})
 
 export const metadata: Metadata = {
   title: "Don't Forget the Oranges",
@@ -18,15 +23,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${ptSans.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

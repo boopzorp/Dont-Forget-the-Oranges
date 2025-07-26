@@ -42,10 +42,10 @@ export function LandingPage() {
           </nav>
           <div className="flex items-center gap-2 ml-auto">
             <Button variant="ghost" asChild>
-              <Link href="/dashboard">Log In</Link>
+              <Link href="/login">Log In</Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard">Sign Up <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link href="/login">Sign Up <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             <ThemeToggleButton />
           </div>
@@ -68,7 +68,7 @@ export function LandingPage() {
               Snap a photo of your handwritten list and let our AI do the rest. Don't Forget the Oranges intelligently organizes, prices, and tracks your shopping.
             </p>
             <Button size="lg" asChild>
-              <Link href="/dashboard">Get Started for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
+              <Link href="/login">Get Started for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
             </Button>
           </motion.div>
           <motion.div 
@@ -129,7 +129,7 @@ export function LandingPage() {
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to revolutionize your shopping?</h2>
               <p className="text-muted-foreground mb-8">Start for free. No credit card required.</p>
               <Button size="lg" asChild>
-                <Link href="/dashboard">Claim Your Free Account <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                <Link href="/login">Claim Your Free Account <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
             </motion.div>
           </div>
