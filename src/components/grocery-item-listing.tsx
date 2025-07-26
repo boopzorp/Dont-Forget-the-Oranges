@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { GroceryItem, StockStatus, Currency } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { ItemPriceHistoryChart } from "@/components/item-price-history-chart";
 
 
@@ -52,6 +52,22 @@ export function GroceryItemListing({
     return CATEGORIES.find((c) => c.name === category)?.emoji || '🛒';
   };
   
+  const getStatusClass = (status: StockStatus) => {
+    switch (status) {
+      case "In Stock":
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-800";
+      case "Need to Order":
+        return "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/50 dark:text-sky-300 dark:border-sky-800";
+      case "Out of Stock":
+        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-300 dark:border-red-800";
+      case "Don't Need":
+        return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800/50 dark:text-slate-300 dark:border-slate-700";
+      default:
+        return "bg-background";
+    }
+  };
+
+
   return (
     <Accordion type="multiple" className="w-full space-y-2">
       {items.map((item) => (
@@ -96,8 +112,8 @@ export function GroceryItemListing({
                 </TooltipProvider>
               ) : (
                 <Select value={item.status} onValueChange={(value: StockStatus) => handleStatusChange(item.id, value)}>
-                    <SelectTrigger className="w-[130px] h-9">
-                    <SelectValue />
+                    <SelectTrigger className={cn("w-[130px] h-9 font-semibold", getStatusClass(item.status))}>
+                        <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                     <SelectItem value="Need to Order">Need to Order</SelectItem>
