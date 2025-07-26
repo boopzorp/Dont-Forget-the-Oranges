@@ -1,12 +1,11 @@
 
-
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
-import { Gift, LogOut, Menu, PlusCircle, ShoppingCart, CalendarDays, Users, Package } from "lucide-react";
+import { Gift, LogOut, Menu, PlusCircle, CalendarDays, Users, Package, MoreHorizontal, Trash2, Pencil } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -14,6 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -34,6 +39,8 @@ import { formatCurrency } from "@/lib/utils";
 import { CURRENCIES } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Logo } from "./logo";
+import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
+
 
 interface CardTrackerDashboardProps {
   events: ShoppingEvent[];
@@ -65,6 +72,16 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
       toast({ variant: "destructive", title: "Error", description: "Could not save the event." });
     }
   };
+  
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!user) return;
+    try {
+      await deleteShoppingEvent(user.uid, eventId);
+      toast({ title: "Event Deleted", description: "The event has been removed." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "Could not delete the event." });
+    }
+  };
 
   const handleGiftSave = async (giftData: Omit<GiftItem, 'id'> & { id?: string }) => {
     if (!user) return;
@@ -83,6 +100,11 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
 
   const openNewEventDialog = () => {
     setEditingEvent(undefined);
+    setIsEventDialogOpen(true);
+  };
+  
+  const openEditEventDialog = (event: ShoppingEvent) => {
+    setEditingEvent(event);
     setIsEventDialogOpen(true);
   };
   
@@ -204,7 +226,31 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                                 </div>
                             </div>
                           </div>
-                          <p className="font-semibold text-primary">{formatDistanceToNow(event.date, { addSuffix: true })}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-primary hidden sm:block">{formatDistanceToNow(event.date, { addSuffix: true })}</p>
+                             <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                        <span className="sr-only">More actions</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => openEditEventDialog(event)}>
+                                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                                    </DropdownMenuItem>
+                                    <ConfirmDeleteDialog
+                                        onConfirm={() => handleDeleteEvent(event.id)}
+                                        title="Delete Event?"
+                                        description={`Are you sure you want to delete the event "${event.name}"? This action cannot be undone.`}
+                                    >
+                                        <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-600 px-2 py-1.5 h-auto text-sm font-normal relative flex cursor-default select-none items-center rounded-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                        </Button>
+                                    </ConfirmDeleteDialog>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                       </li>
                     ))}
                   </ul>
