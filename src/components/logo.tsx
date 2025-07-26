@@ -19,7 +19,7 @@ export function Logo() {
     <svg
       role="img"
       aria-label="Logo"
-      xmlns="http://www.w3.org/2000/svg"
+      xmlns="assets/logo.png"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
