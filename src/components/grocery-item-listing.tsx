@@ -72,10 +72,10 @@ export function GroceryItemListing({
     <Accordion type="multiple" className="w-full space-y-2">
       {items.map((item) => (
         <AccordionItem value={item.id} key={item.id} className="border-b-0 rounded-lg bg-card overflow-hidden shadow-sm">
-          <div className="flex items-center px-4">
-            <AccordionTrigger className="flex-1 p-0 py-2 hover:no-underline">
+           <div className="flex flex-col md:flex-row md:items-center p-2 md:p-4">
+             <AccordionTrigger className="flex-1 p-0 hover:no-underline [&>svg]:hidden md:[&>svg]:block">
               <div className="flex items-center gap-4 flex-1">
-                <span className="text-2xl">{getCategoryEmoji(item.category)}</span>
+                <span className="text-2xl ml-2 md:ml-0">{getCategoryEmoji(item.category)}</span>
                 <div className="flex-1 overflow-hidden">
                   <p className="font-semibold truncate pr-2">{item.name}</p>
                   <p className="text-sm text-muted-foreground">
@@ -84,45 +84,34 @@ export function GroceryItemListing({
                 </div>
               </div>
             </AccordionTrigger>
-            <div className="flex items-center gap-4 ml-auto pl-4">
-              {isShoppingList ? (
-                <TooltipProvider>
+
+            <div className="flex items-center justify-between gap-2 md:gap-4 mt-2 md:mt-0 md:ml-auto md:pl-4">
+              <div className="flex-1 md:flex-none">
+                {isShoppingList ? (
                     <div className="flex items-center gap-2">
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="w-9 h-9 text-green-600 hover:text-green-700" onClick={() => handleStatusChange(item.id, 'In Stock')}>
-                                    <CheckCircle2 className="h-5 w-5"/>
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Mark as "In Stock"</p>
-                            </TooltipContent>
-                        </Tooltip>
-                         <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="w-9 h-9 text-red-600 hover:text-red-700" onClick={() => handleDeleteItem(item.id)}>
-                                    <Trash2 className="h-5 w-5"/>
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Remove from Shopping List</p>
-                            </TooltipContent>
-                        </Tooltip>
+                      <Button size="sm" variant="outline" className="text-green-600 border-green-300 w-full justify-center" onClick={() => handleStatusChange(item.id, 'In Stock')}>
+                          <CheckCircle2 className="h-4 w-4 mr-2"/>
+                          Got it
+                      </Button>
+                       <Button size="sm" variant="ghost" className="text-red-600" onClick={() => handleDeleteItem(item.id)}>
+                          <Trash2 className="h-4 w-4 mr-2"/>
+                          Remove
+                      </Button>
                     </div>
-                </TooltipProvider>
-              ) : (
-                <Select value={item.status} onValueChange={(value: StockStatus) => handleStatusChange(item.id, value)}>
-                    <SelectTrigger className={cn("w-[130px] h-9 font-semibold", getStatusClass(item.status))}>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                    <SelectItem value="Need to Order">Need to Order</SelectItem>
-                    <SelectItem value="In Stock">In Stock</SelectItem>
-                    <SelectItem value="Out of Stock">Out of Stock</SelectItem>
-                    <SelectItem value="Don't Need">Don't Need</SelectItem>
-                    </SelectContent>
-                </Select>
-              )}
+                ) : (
+                  <Select value={item.status} onValueChange={(value: StockStatus) => handleStatusChange(item.id, value)}>
+                      <SelectTrigger className={cn("w-full md:w-[130px] h-9 font-semibold", getStatusClass(item.status))}>
+                          <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                      <SelectItem value="Need to Order">Need to Order</SelectItem>
+                      <SelectItem value="In Stock">In Stock</SelectItem>
+                      <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                      <SelectItem value="Don't Need">Don't Need</SelectItem>
+                      </SelectContent>
+                  </Select>
+                )}
+              </div>
               <p className="font-bold w-[80px] text-right">
                 {formatCurrency(item.price * item.quantity, currency)}
               </p>

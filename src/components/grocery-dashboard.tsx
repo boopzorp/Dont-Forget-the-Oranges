@@ -280,35 +280,36 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         onChange={handleImageUpload} 
       />
 
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background px-4 md:px-6">
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <Leaf className="h-6 w-6 text-primary" />
-          <span className="font-headline">GrocerEase</span>
+          <span className="font-headline hidden md:inline">GrocerEase</span>
         </h1>
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-2 md:gap-4">
            <Select onValueChange={(value) => setCurrency(CURRENCIES.find(c => c.code === value) || CURRENCIES[0])} value={currency.code}>
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-[100px] md:w-[120px]">
                 <SelectValue placeholder="Currency" />
               </SelectTrigger>
               <SelectContent>
                 {CURRENCIES.map(c => <SelectItem key={c.code} value={c.code}>{c.code} ({c.symbol})</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isProcessingImage}>
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isProcessingImage}>
                 {isProcessingImage ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin md:mr-2" />
                 ) : (
-                    <Upload className="mr-2 h-4 w-4" />
+                    <Upload className="h-4 w-4 md:mr-2" />
                 )}
-                Upload List
+                <span className="hidden md:inline">Upload List</span>
             </Button>
-            <Button onClick={openNewItemDialog}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+            <Button size="sm" onClick={openNewItemDialog}>
+                <PlusCircle className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Add Item</span>
           </Button>
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col gap-4 p-4 md:p-8">
+      <main className="flex flex-1 flex-col gap-4 p-2 md:p-8">
         <Card>
           <CardHeader>
             <CardTitle>Spending Overview</CardTitle>
