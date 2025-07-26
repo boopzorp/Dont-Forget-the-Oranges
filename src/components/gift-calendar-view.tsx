@@ -58,36 +58,8 @@ export function GiftCalendarView({ events, gifts, onDateSelect }: GiftCalendarVi
       border: "2px solid hsl(var(--primary))",
     },
     purchase: {
-      // This will add a dot using a pseudo-element
-      position: 'relative',
+      // This style will be applied by a class name, not directly
     },
-  };
-  
-  const CustomDay = (dayProps: any) => {
-    const { date, displayMonth } = dayProps;
-    if (!displayMonth) return null;
-    
-    const isPurchase = purchaseDates.some(pd => toDateString(pd) === toDateString(date));
-    
-    return (
-      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-        {dayProps.children}
-        {isPurchase && 
-          <div 
-            style={{ 
-              position: 'absolute', 
-              bottom: '4px', 
-              left: '50%', 
-              transform: 'translateX(-50%)', 
-              width: '5px', 
-              height: '5px', 
-              borderRadius: '50%',
-              backgroundColor: 'hsl(var(--primary))' 
-            }} 
-          />
-        }
-      </div>
-    );
   };
   
   const handleSelect = (date: Date | undefined) => {
@@ -100,6 +72,17 @@ export function GiftCalendarView({ events, gifts, onDateSelect }: GiftCalendarVi
     <div className="flex flex-col items-center">
       <style>{`
         .rdp-day_event { border: 2px solid hsl(var(--primary)); }
+        .rdp-day_purchase::after {
+          content: '';
+          position: absolute;
+          bottom: 4px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background-color: hsl(var(--primary));
+        }
       `}</style>
       <Calendar
         mode="single"
@@ -108,9 +91,11 @@ export function GiftCalendarView({ events, gifts, onDateSelect }: GiftCalendarVi
         month={month}
         onMonthChange={setMonth}
         modifiers={modifiers}
-        modifiersClassNames={{ event: 'rdp-day_event' }}
+        modifiersClassNames={{ 
+          event: 'rdp-day_event',
+          purchase: 'rdp-day_purchase',
+        }}
         className="rounded-md border"
-        components={{ DayContent: CustomDay }}
       />
        <div className="flex items-center gap-6 mt-4 p-4 bg-muted/50 rounded-lg w-full justify-center">
         <div className="flex items-center gap-2">
@@ -125,3 +110,4 @@ export function GiftCalendarView({ events, gifts, onDateSelect }: GiftCalendarVi
     </div>
   );
 }
+
