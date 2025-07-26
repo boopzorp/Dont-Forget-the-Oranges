@@ -289,11 +289,13 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         onChange={handleImageUpload} 
       />
 
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background px-4 md:px-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold">
-          <Logo />
-          <span className="font-headline hidden md:inline">Don't Forget the Oranges!</span>
-        </h1>
+      <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b bg-background px-4 md:px-6">
+        <div className="flex items-center gap-2">
+            <Logo />
+            <div className="font-headline text-lg leading-tight hidden md:block">
+              Don't Forget<br/>the Oranges!
+            </div>
+        </div>
         <div className="ml-auto flex items-center gap-2 md:gap-4">
            <Select onValueChange={(value) => setCurrency(CURRENCIES.find(c => c.code === value) || CURRENCIES[0])} value={currency.code}>
               <SelectTrigger className="w-[100px] md:w-[120px]">
@@ -397,3 +399,5 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     </div>
   );
 }
+
+    

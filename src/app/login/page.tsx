@@ -26,7 +26,9 @@ export default function LoginPage() {
          <div className="flex justify-center mb-6">
           <Link href="/" className="flex items-center gap-2">
             <Logo />
-            <span className="font-headline text-2xl">Don't Forget the Oranges</span>
+            <div className="font-headline text-2xl leading-tight">
+              Don't Forget<br/>the Oranges!
+            </div>
           </Link>
         </div>
         <LoginForm />
@@ -34,3 +36,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+    

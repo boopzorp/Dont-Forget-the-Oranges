@@ -30,10 +30,12 @@ export function LandingPage() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center">
+        <div className="container flex h-20 items-center">
           <Link href="/" className="flex items-center gap-2 mr-auto">
             <Logo />
-            <span className="font-headline text-xl hidden sm:inline-block">Don't Forget the Oranges!</span>
+            <div className="font-headline text-lg leading-tight hidden sm:block">
+              Don't Forget<br/>the Oranges!
+            </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <Link href="#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</Link>
@@ -149,3 +151,5 @@ export function LandingPage() {
     </div>
   );
 }
+
+    
