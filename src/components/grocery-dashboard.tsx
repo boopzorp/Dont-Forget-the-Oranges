@@ -1,13 +1,8 @@
+
 "use client";
 
 import * as React from "react";
 import { Leaf, MoreHorizontal, PlusCircle } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
 import {
   Card,
   CardContent,
@@ -24,22 +19,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import type { GroceryItem, Order, Category, StockStatus, Currency } from "@/lib/types";
-import { CATEGORIES, CURRENCIES } from "@/lib/data";
+import type { GroceryItem, Category, StockStatus, Currency } from "@/lib/types";
+import { CURRENCIES } from "@/lib/data";
 import { formatCurrency } from "@/lib/utils";
 import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
-import { ItemPriceHistoryChart } from "@/components/item-price-history-chart";
 import { AddItemDialog } from "./add-item-dialog";
 import { CategoryDetailDialog } from "./category-detail-dialog";
+import { GroceryItemListing } from "./grocery-item-listing";
 
 interface GroceryDashboardProps {
   initialItems: GroceryItem[];
@@ -92,7 +81,21 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   };
 
   const handleStatusChange = (itemId: string, status: StockStatus) => {
-    setItems(items.map(i => i.id === itemId ? { ...i, status } : i));
+    setItems(items.map(i => {
+        if (i.id === itemId) {
+            const updatedItem = { ...i, status };
+            // If item is moved to "In Stock" from "Need to Order", add a new order history record
+            if (status === 'In Stock' && i.status === 'Need to Order') {
+                updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price}];
+                toast({
+                    title: "Item Stocked",
+                    description: `${i.name} marked as "In Stock" and purchase recorded.`,
+                });
+            }
+            return updatedItem;
+        }
+        return i;
+    }));
   };
   
   const shoppingList = items.filter((item) => item.status === "Need to Order");
@@ -100,10 +103,6 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     (total, item) => total + item.price * item.quantity,
     0
   );
-
-  const getCategoryEmoji = (category: string) => {
-    return CATEGORIES.find((c) => c.name === category)?.emoji || '🛒';
-  };
   
   const openEditDialog = (item: GroceryItem) => {
     setEditingItem(item);
@@ -124,64 +123,6 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     setSelectedCategory(null);
   };
 
-  const ListLayout = ({ listItems }: { listItems: GroceryItem[] }) => (
-    <Accordion type="multiple" className="w-full space-y-2">
-      {listItems.map((item) => (
-        <AccordionItem value={item.id} key={item.id} className="border-b-0 rounded-lg bg-card overflow-hidden shadow-sm">
-          <div className="flex items-center px-4 py-2">
-            <AccordionTrigger className="flex-1 p-0 hover:no-underline">
-              <div className="flex items-center gap-4 flex-1">
-                <span className="text-2xl">{getCategoryEmoji(item.category)}</span>
-                <div className="flex-1">
-                  <p className="font-semibold">{item.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Qty: {item.quantity} &bull; {item.category}
-                  </p>
-                </div>
-              </div>
-            </AccordionTrigger>
-            <div className="flex items-center gap-4 ml-4">
-              <Select value={item.status} onValueChange={(value: StockStatus) => handleStatusChange(item.id, value)}>
-                <SelectTrigger className="w-[130px] h-9">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="In Stock">In Stock</SelectItem>
-                  <SelectItem value="Need to Order">Need to Order</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="font-bold w-[80px] text-right">
-                {formatCurrency(item.price * item.quantity, currency)}
-              </p>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost" className="w-8 h-8">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => openEditDialog(item)}>Edit</DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="text-red-600"
-                    onClick={() => handleDeleteItem(item.id)}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-          <AccordionContent>
-            <div className="p-4 bg-muted/40">
-                <h4 className="font-semibold mb-2 text-sm">Price History</h4>
-                <ItemPriceHistoryChart orderHistory={item.orderHistory} currency={currency} />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      ))}
-    </Accordion>
-  );
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-secondary/60">
       {selectedCategory && (
@@ -193,6 +134,16 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
           currency={currency}
         />
       )}
+      <AddItemDialog 
+        onConfirm={handleItemAction} 
+        itemToEdit={editingItem}
+        isOpen={isAddItemDialogOpen}
+        onOpenChange={setIsAddItemDialogOpen}
+      >
+        {/* Empty child to use this as a controlled dialog */}
+        <div/>
+      </AddItemDialog>
+
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <Leaf className="h-6 w-6 text-primary" />
@@ -207,16 +158,9 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 {CURRENCIES.map(c => <SelectItem key={c.code} value={c.code}>{c.code} ({c.symbol})</SelectItem>)}
               </SelectContent>
             </Select>
-          <AddItemDialog 
-            onConfirm={handleItemAction} 
-            itemToEdit={editingItem}
-            isOpen={isAddItemDialogOpen}
-            onOpenChange={setIsAddItemDialogOpen}
-          >
-             <Button onClick={openNewItemDialog}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
-          </AddItemDialog>
+            <Button onClick={openNewItemDialog}>
+            <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+          </Button>
         </div>
       </header>
 
@@ -251,7 +195,14 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                   </CardHeader>
                   <CardContent>
                     {shoppingList.length > 0 ? (
-                        <ListLayout listItems={shoppingList} />
+                        <GroceryItemListing 
+                          items={shoppingList} 
+                          currency={currency}
+                          handleStatusChange={handleStatusChange}
+                          handleDeleteItem={handleDeleteItem}
+                          openEditDialog={openEditDialog}
+                          isShoppingList={true}
+                        />
                     ) : (
                         <div className="text-center py-10 text-muted-foreground">
                             <p>Your shopping list is empty!</p>
@@ -273,7 +224,13 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                       <CardTitle>All Items</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ListLayout listItems={items} />
+                        <GroceryItemListing 
+                           items={items} 
+                           currency={currency}
+                           handleStatusChange={handleStatusChange}
+                           handleDeleteItem={handleDeleteItem}
+                           openEditDialog={openEditDialog}
+                        />
                     </CardContent>
                 </Card>
             </TabsContent>
