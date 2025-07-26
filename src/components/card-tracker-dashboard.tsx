@@ -3,6 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
 import { Gift, LogOut, Menu, PlusCircle, ShoppingCart, CalendarDays, Users, Package } from "lucide-react";
 import {
@@ -128,7 +129,13 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
         <header className="sticky top-0 z-30 flex h-20 items-center border-b bg-background">
           <div className="container mx-auto flex h-full items-center gap-4 px-4 sm:px-6">
             <Link href="/" className="flex items-center gap-2">
-              <Gift className="h-8 w-8 text-primary" />
+              <Image 
+                src="/card-logo.png" 
+                alt="Don't Forget the Card! Logo" 
+                width={32} 
+                height={32} 
+                className="h-8 w-8"
+              />
               <div className="font-headline text-xl hidden sm:block">
                 Don't Forget the Card!
               </div>
