@@ -4,7 +4,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { format, formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow, getYear } from "date-fns";
 import { Gift, LogOut, Menu, PlusCircle, CalendarDays, Users, Package, MoreHorizontal, Trash2, Pencil } from "lucide-react";
 import {
   Card,
@@ -27,10 +27,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import type { ShoppingEvent, GiftItem } from "@/lib/types";
+import type { ShoppingEvent, GiftItem, AppName } from "@/lib/types";
 import { ThemeToggleButton } from "./theme-toggle-button";
 import { useAuth } from "@/hooks/use-auth";
-import type { AppName } from "@/app/dashboard/page";
 import { addShoppingEvent, updateShoppingEvent, deleteShoppingEvent, addGiftItem, updateGiftItem, deleteGiftItem } from "@/lib/firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { AddEventDialog } from "./add-event-dialog";
@@ -113,9 +112,39 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
     setIsGiftDialogOpen(true);
   };
 
-  const sortedEvents = React.useMemo(() => 
-    [...events].sort((a, b) => a.date.getTime() - b.date.getTime()), 
-  [events]);
+  const sortedEvents = React.useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today's date for accurate comparison
+
+    return events
+      .map(event => {
+        let nextOccurrence = new Date(event.date);
+        const isRecurring = event.category === "Birthday" || event.category === "Anniversary";
+
+        if (isRecurring) {
+          // If the event has passed this year, set it to next year
+          if (nextOccurrence < today) {
+            nextOccurrence.setFullYear(getYear(today) + 1);
+          }
+          // If the event date was for a previous year but is still in the future this year, update it
+          if (getYear(nextOccurrence) < getYear(today)) {
+             nextOccurrence.setFullYear(getYear(today));
+             // Re-check if it's now in the past after year correction
+             if (nextOccurrence < today) {
+               nextOccurrence.setFullYear(getYear(today) + 1);
+             }
+          }
+        }
+        
+        return { ...event, displayDate: nextOccurrence };
+      })
+      .filter(event => {
+        // Filter out past, non-recurring events
+        return event.displayDate >= today || event.category === "Birthday" || event.category === "Anniversary";
+      })
+      .sort((a, b) => a.displayDate.getTime() - b.displayDate.getTime());
+  }, [events]);
+
 
   const sortedGifts = React.useMemo(() =>
     [...gifts].sort((a,b) => b.purchaseDate.getTime() - a.purchaseDate.getTime()),
@@ -221,13 +250,13 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                             <div>
                                 <p className="font-semibold">{event.name}</p>
                                 <div className="flex items-center gap-2">
-                                  <p className="text-sm text-muted-foreground">{format(event.date, "MMMM do, yyyy")}</p>
+                                  <p className="text-sm text-muted-foreground">{format(event.displayDate, "MMMM do, yyyy")}</p>
                                   <Badge variant={getCategoryBadgeVariant(event.category)}>{event.category}</Badge>
                                 </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <p className="font-semibold text-primary hidden sm:block">{formatDistanceToNow(event.date, { addSuffix: true })}</p>
+                            <p className="font-semibold text-primary hidden sm:block">{formatDistanceToNow(event.displayDate, { addSuffix: true })}</p>
                              <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -298,3 +327,5 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
     </>
   );
 }
+
+    

@@ -37,6 +37,7 @@ export type ShoppingEvent = {
     date: Date;
     category: EventCategory;
     notes?: string;
+    displayDate?: Date; // Added for sorting logic, not stored in DB
 };
 
 export type GiftItem = {
@@ -48,3 +49,7 @@ export type GiftItem = {
     recipient: string;
     notes?: string;
 };
+
+export type AppName = 'groceries' | 'gifts';
+
+    
