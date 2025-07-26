@@ -29,6 +29,8 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,6 +52,7 @@ import { Logo } from "./logo";
 import { useAuth } from "@/hooks/use-auth";
 import { addItem, updateItem, deleteItem } from "@/lib/firebase/firestore";
 import type { AppName } from "@/app/dashboard/page";
+import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
 
 interface GroceryDashboardProps {
   initialItems: GroceryItem[];
@@ -488,20 +491,23 @@ export function GroceryDashboard({ initialItems, onAppChange }: GroceryDashboard
                     </Button>
                 </SheetTrigger>
                 <SheetContent>
-                    <nav className="grid gap-4 text-lg font-medium mt-8">
-                        <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('groceries')}>
-                            <ShoppingCart className="h-5 w-5" />
-                            GrocerEase
-                        </Button>
-                        <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('gifts')}>
-                            <Gift className="h-5 w-5" />
-                            Don't Forget the Card!
-                        </Button>
-                         <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={signOut}>
-                            <LogOut className="h-5 w-5" />
-                            Log Out
-                        </Button>
-                    </nav>
+                  <SheetHeader>
+                    <SheetTitle className="sr-only">Main Menu</SheetTitle>
+                  </SheetHeader>
+                  <nav className="grid gap-4 text-lg font-medium mt-8">
+                      <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('groceries')}>
+                          <ShoppingCart className="h-5 w-5" />
+                          GrocerEase
+                      </Button>
+                      <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('gifts')}>
+                          <Gift className="h-5 w-5" />
+                          Don't Forget the Card!
+                      </Button>
+                        <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={signOut}>
+                          <LogOut className="h-5 w-5" />
+                          Log Out
+                      </Button>
+                  </nav>
                 </SheetContent>
             </Sheet>
           </div>
