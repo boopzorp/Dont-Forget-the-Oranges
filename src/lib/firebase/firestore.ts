@@ -40,10 +40,15 @@ const groceryFromFirestore = (snapshot: any): GroceryItem => {
   } as GroceryItem;
 };
 
-const eventToFirestore = (event: Omit<ShoppingEvent, 'id'> | ShoppingEvent) => ({
-  ...event,
-  date: Timestamp.fromDate(event.date),
-});
+const eventToFirestore = (event: Omit<ShoppingEvent, 'id'> | ShoppingEvent) => {
+  // This was the source of the bug. It needs to explicitly return all fields.
+  return {
+    name: event.name,
+    date: Timestamp.fromDate(event.date),
+    category: event.category,
+    notes: event.notes || '',
+  };
+};
 
 const eventFromFirestore = (snapshot: any): ShoppingEvent => {
   const data = snapshot.data();
