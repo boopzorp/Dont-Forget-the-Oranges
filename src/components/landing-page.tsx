@@ -64,13 +64,13 @@ export function LandingPage() {
             transition={{ duration: 0.7 }}
           >
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-4">
-              Grocery Lists, <span className="text-primary italic font-bold">Supercharged</span>.
+              Finally, a grocery app that's <span className="text-primary italic font-bold">actually fun</span>.
             </h1>
             <p className="max-w-xl mx-auto text-muted-foreground md:text-xl mb-8">
-              Snap a photo of your handwritten list and let our AI do the rest. Don't Forget the Oranges! intelligently organizes, prices, and tracks your shopping.
+              Tired of finding your grocery list crumpled in your pocket? Or worse, left on the counter? Snap a pic of that messy handwriting and let us work our magic.
             </p>
             <Button size="lg" asChild>
-              <Link href="/login">Get Started for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
+              <Link href="/login">Okay, I'm Intrigued <ArrowRight className="ml-2 h-5 w-5" /></Link>
             </Button>
           </motion.div>
           <motion.div 
@@ -94,26 +94,26 @@ export function LandingPage() {
         <section id="features" className="py-20 md:py-32 bg-muted/40">
           <div className="container">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold">Shopping, but way smarter.</h2>
-              <p className="text-muted-foreground mt-4">Here's how Don't Forget the Oranges! transforms your grocery routine from a chore into a breeze.</p>
+              <h2 className="text-3xl md:text-4xl font-bold">From kitchen chaos to shopping bliss.</h2>
+              <p className="text-muted-foreground mt-4">We turn your "Oh, what was that thing?" into "Got it!" Here's how we help you (finally) remember the oranges.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               <FeatureCard 
                 icon={<UploadCloud size={24} />}
-                title="Snap & Go"
-                description="Upload any grocery list—handwritten, a screenshot, or a receipt. Our AI digitizes it instantly."
+                title="Scribbles to Lists"
+                description="Snap a picture of your weirdest, messiest grocery list. Our AI isn't scared. It'll digitize it in seconds."
                 delay={0.2}
               />
               <FeatureCard 
                 icon={<CheckCircle size={24} />}
-                title="Intelligent Sorting"
-                description="Your items are automatically categorized (Produce, Dairy, etc.) to make shopping trips faster."
+                title="Aisle-by-Aisle Sanity"
+                description="No more backtracking for the ketchup. We automatically sort your items by category to save your steps (and your sanity)."
                 delay={0.3}
               />
               <FeatureCard 
                 icon={<BarChart2 size={24} />}
-                title="Track Your Spending"
-                description="Analyze your spending habits with our simple, beautiful charts. See where your money goes."
+                title="Be a Budget Genius"
+                description="Wondering where all your money went? (Hint: it was cheese.) See your spending habits with charts so simple, they're beautiful."
                 delay={0.4}
               />
             </div>
@@ -128,10 +128,10 @@ export function LandingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
               >
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to revolutionize your shopping?</h2>
-              <p className="text-muted-foreground mb-8">Start for free. No credit card required.</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to never forget the oranges again?</h2>
+              <p className="text-muted-foreground mb-8">It's free. What have you got to lose? (Besides that crumpled list.)</p>
               <Button size="lg" asChild>
-                <Link href="/login">Claim Your Free Account <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                <Link href="/login">Let's Do This! <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
             </motion.div>
           </div>
