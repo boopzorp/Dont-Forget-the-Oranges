@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,6 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { Order, Currency } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
@@ -41,10 +43,12 @@ interface PurchaseDetailDialogProps {
   orders: Order[];
   currency: Currency;
   onDelete: (group: string) => void;
+  onUpdateGroup: (currentGroup: string, newGroup: string) => void;
 }
 
-export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency, onDelete }: PurchaseDetailDialogProps) {
+export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency, onDelete, onUpdateGroup }: PurchaseDetailDialogProps) {
   const [selectedGroup, setSelectedGroup] = React.useState<string>("All");
+  const [newGroupName, setNewGroupName] = React.useState("");
 
   const uniqueGroups = React.useMemo(() => {
     const groups = new Set<string>(['All']);
@@ -68,6 +72,7 @@ export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency, 
   React.useEffect(() => {
     if(isOpen) {
       setSelectedGroup("All");
+      setNewGroupName("");
     }
   }, [isOpen]);
 
@@ -75,22 +80,29 @@ export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency, 
     onDelete(selectedGroup);
   };
 
+  const handleUpdateGroup = () => {
+    if (newGroupName.trim()) {
+      onUpdateGroup(selectedGroup, newGroupName.trim());
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl">
             Purchases on {format(date, "MMMM d, yyyy")}
           </DialogTitle>
           <DialogDescription>
-            You purchased {orders.length} item(s) on this day. Filter by group below.
+            View, filter, and manage purchase entries for this day.
           </DialogDescription>
         </DialogHeader>
         
-        {uniqueGroups.length > 1 && (
-            <div className="my-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+            <div>
+                <Label>Filter by group</Label>
                 <Select value={selectedGroup} onValueChange={setSelectedGroup}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger>
                         <SelectValue placeholder="Filter by group..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -102,27 +114,50 @@ export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency, 
                     </SelectContent>
                 </Select>
             </div>
-        )}
+            <div>
+                <Label>Change selected group to</Label>
+                <div className="flex gap-2">
+                     <Input 
+                        placeholder="New group name..." 
+                        value={newGroupName} 
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        disabled={filteredOrders.length === 0}
+                    />
+                    <Button onClick={handleUpdateGroup} disabled={!newGroupName.trim() || filteredOrders.length === 0}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Update
+                    </Button>
+                </div>
+            </div>
+        </div>
 
-        <div className="max-h-[50vh] overflow-y-auto my-4">
+        <div className="max-h-[40vh] overflow-y-auto my-4 border rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Item</TableHead>
                 <TableHead>Qty</TableHead>
                 <TableHead>Unit Price</TableHead>
-                <TableHead>Total</TableHead>
+                <TableHead>Group</TableHead>
+                <TableHead className="text-right">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order, index) => (
+              {filteredOrders.length > 0 ? filteredOrders.map((order, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">{order.name}</TableCell>
                   <TableCell>{order.quantity}</TableCell>
                   <TableCell>{formatCurrency(order.price, currency)}</TableCell>
-                  <TableCell className="font-semibold">{formatCurrency(order.price * order.quantity, currency)}</TableCell>
+                  <TableCell>{order.group || 'N/A'}</TableCell>
+                  <TableCell className="font-semibold text-right">{formatCurrency(order.price * order.quantity, currency)}</TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                        No items match the current filter.
+                    </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
@@ -135,7 +170,7 @@ export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency, 
                 <div className="flex gap-2">
                     <ConfirmDeleteDialog
                         onConfirm={handleDelete}
-                        title="Delete Purchase Entries?"
+                        title={`Delete entries from ${selectedGroup}?`}
                         description={`Are you sure you want to delete all entries for the group '${selectedGroup}' on this date? This action cannot be undone.`}
                         disabled={filteredOrders.length === 0}
                     >

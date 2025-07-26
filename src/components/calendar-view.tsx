@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { format, getMonth, getYear, parseISO, startOfDay } from 'date-fns';
+import { format, getMonth, getYear, parseISO } from 'date-fns';
 import { Calendar } from "@/components/ui/calendar";
 import type { GroceryItem, Currency, Order } from "@/lib/types";
 import { formatCurrency, toDateString } from "@/lib/utils";
@@ -12,9 +12,10 @@ interface CalendarViewProps {
   items: GroceryItem[];
   currency: Currency;
   onDeleteByDateAndGroup: (date: Date, group: string) => void;
+  onUpdateGroupByDate: (date: Date, currentGroup: string, newGroup: string) => void;
 }
 
-export function CalendarView({ items, currency, onDeleteByDateAndGroup }: CalendarViewProps) {
+export function CalendarView({ items, currency, onDeleteByDateAndGroup, onUpdateGroupByDate }: CalendarViewProps) {
   const [month, setMonth] = React.useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [purchasesForSelectedDate, setPurchasesForSelectedDate] = React.useState<Order[]>([]);
@@ -26,7 +27,6 @@ export function CalendarView({ items, currency, onDeleteByDateAndGroup }: Calend
 
     items.forEach(item => {
       item.orderHistory.forEach(order => {
-        // Use a timezone-agnostic date string as the key
         const dateKey = toDateString(order.date);
         
         dates.add(dateKey);
@@ -34,15 +34,13 @@ export function CalendarView({ items, currency, onDeleteByDateAndGroup }: Calend
         const existingOrders = byDate.get(dateKey) || [];
         byDate.set(dateKey, [...existingOrders, { ...order, name: item.name }]);
 
-        // Calculate total spend for the currently viewed month
         if (getMonth(order.date) === getMonth(month) && getYear(order.date) === getYear(month)) {
           spend += order.price * order.quantity;
         }
       });
     });
     
-    // To show markers, parse the string as a UTC date to prevent shifts
-    const purchaseDateObjects = Array.from(dates).map(d => parseISO(`${d}T00:00:00Z`));
+    const purchaseDateObjects = Array.from(dates).map(d => parseISO(d));
 
     return {
       purchaseDates: purchaseDateObjects,
@@ -89,9 +87,16 @@ export function CalendarView({ items, currency, onDeleteByDateAndGroup }: Calend
   const handleDelete = (group: string) => {
     if (selectedDate) {
       onDeleteByDateAndGroup(selectedDate, group);
-      setSelectedDate(null); // Close dialog after deletion
+      setSelectedDate(null);
     }
   };
+
+  const handleUpdateGroup = (currentGroup: string, newGroup: string) => {
+     if (selectedDate) {
+      onUpdateGroupByDate(selectedDate, currentGroup, newGroup);
+      setSelectedDate(null);
+    }
+  }
 
   return (
     <>
@@ -103,6 +108,7 @@ export function CalendarView({ items, currency, onDeleteByDateAndGroup }: Calend
           orders={purchasesForSelectedDate}
           currency={currency}
           onDelete={handleDelete}
+          onUpdateGroup={handleUpdateGroup}
         />
       )}
       <div className="flex flex-col items-center gap-4">
@@ -123,3 +129,5 @@ export function CalendarView({ items, currency, onDeleteByDateAndGroup }: Calend
     </>
   );
 }
+
+    

@@ -164,6 +164,48 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     }
   };
 
+  const handleUpdateGroupForDate = async (date: Date, currentGroup: string, newGroup: string) => {
+    if (!user || !newGroup) return;
+
+    const dateKeyToUpdate = toDateString(date);
+    const itemsToUpdate: GroceryItem[] = [];
+
+    items.forEach(item => {
+      let itemModified = false;
+      const newOrderHistory = item.orderHistory.map(order => {
+        const orderDateKey = toDateString(order.date);
+        if (orderDateKey === dateKeyToUpdate) {
+          if (currentGroup === "All" || order.group === currentGroup) {
+            if (order.group !== newGroup) {
+              itemModified = true;
+              return { ...order, group: newGroup };
+            }
+          }
+        }
+        return order;
+      });
+
+      if (itemModified) {
+        itemsToUpdate.push({ ...item, orderHistory: newOrderHistory });
+      }
+    });
+    
+    if (itemsToUpdate.length > 0) {
+      const updatePromises = itemsToUpdate.map(item => updateItem(user.uid, item));
+      await Promise.all(updatePromises);
+      toast({
+        title: "Entries Updated",
+        description: `Group for purchases on ${format(date, 'PPP')} changed to '${newGroup}'.`,
+      });
+    } else {
+      toast({
+        title: "No Changes Made",
+        description: `No entries needed to be updated for the selected criteria.`,
+      });
+    }
+  };
+
+
   const handleStatusChange = async (itemId: string, status: StockStatus, newQuantity?: number) => {
     if (!user) return;
     const itemToUpdate = items.find(i => i.id === itemId);
@@ -608,7 +650,12 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                          <CalendarView items={items} currency={currency} onDeleteByDateAndGroup={handleDeleteByDateAndGroup} />
+                          <CalendarView 
+                            items={items} 
+                            currency={currency} 
+                            onDeleteByDateAndGroup={handleDeleteByDateAndGroup}
+                            onUpdateGroupByDate={handleUpdateGroupForDate}
+                           />
                       </CardContent>
                   </Card>
               </TabsContent>
