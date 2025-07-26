@@ -36,9 +36,7 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
         byDate.set(dateKey, [...existingOrders, { ...order, name: item.name }]);
 
         // Calculate total spend for the currently viewed month
-        // We compare UTC months and years to be consistent
-        const orderDate = startOfDay(order.date);
-        if (getMonth(orderDate) === getMonth(month) && getYear(orderDate) === getYear(month)) {
+        if (getMonth(order.date) === getMonth(month) && getYear(order.date) === getYear(month)) {
           spend += order.price * order.quantity;
         }
       });
@@ -59,7 +57,9 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
     
     // To reliably match with our UTC-based keys, we format the selected date (which is local)
     // into its UTC YYYY-MM-DD equivalent.
-    const dateKey = format(date, "yyyy-MM-dd");
+    const timezoneOffset = date.getTimezoneOffset() * 60000;
+    const utcDate = new Date(date.getTime() - timezoneOffset);
+    const dateKey = utcDate.toISOString().slice(0, 10);
 
     const purchases = purchasesByDate.get(dateKey);
     
