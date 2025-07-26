@@ -64,7 +64,7 @@ export function LandingPage() {
             transition={{ duration: 0.7 }}
           >
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-4">
-              Finally, a grocery app that's <span className="text-primary italic font-bold">actually fun</span>.
+              Finally, a grocery app that's <span className="text-primary font-headline">actually fun</span>.
             </h1>
             <p className="max-w-xl mx-auto text-muted-foreground md:text-xl mb-8">
               Tired of finding your grocery list crumpled in your pocket? Or worse, left on the counter? Snap a pic of that messy handwriting and let us work our magic.
