@@ -14,7 +14,7 @@ import { getItems, getShoppingEvents, getGiftItems } from '@/lib/firebase/firest
 export type AppName = 'groceries' | 'gifts';
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   
   const [currentApp, setCurrentApp] = React.useState<AppName>('groceries');
@@ -23,46 +23,60 @@ export default function DashboardPage() {
   const [shoppingEvents, setShoppingEvents] = React.useState<ShoppingEvent[]>([]);
   const [giftItems, setGiftItems] = React.useState<GiftItem[]>([]);
 
-  const [initialLoad, setInitialLoad] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       router.push('/login');
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
   React.useEffect(() => {
     if (user) {
-      setInitialLoad(true);
-      let unsubscribe: () => void = () => {};
-      let unsubscribe2: () => void = () => {};
-      let unsubscribe3: () => void = () => {};
+      setIsLoading(true);
+      
+      const subscriptions: (() => void)[] = [];
 
       if (currentApp === 'groceries') {
-        unsubscribe = getItems(user.uid, (newItems) => {
+        const unsubscribeGroceries = getItems(user.uid, (newItems) => {
           setGroceryItems(newItems);
-          setInitialLoad(false);
+          setIsLoading(false);
         });
+        subscriptions.push(unsubscribeGroceries);
       } else if (currentApp === 'gifts') {
-         unsubscribe2 = getShoppingEvents(user.uid, (newEvents) => {
+        // We need to wait for both subscriptions to report back before setting loading to false
+        let eventsLoaded = false;
+        let giftsLoaded = false;
+
+        const checkBothLoaded = () => {
+          if (eventsLoaded && giftsLoaded) {
+            setIsLoading(false);
+          }
+        }
+        
+        const unsubscribeEvents = getShoppingEvents(user.uid, (newEvents) => {
           setShoppingEvents(newEvents);
+          eventsLoaded = true;
+          checkBothLoaded();
         });
-         unsubscribe3 = getGiftItems(user.uid, (newGifts) => {
+        subscriptions.push(unsubscribeEvents);
+
+        const unsubscribeGifts = getGiftItems(user.uid, (newGifts) => {
           setGiftItems(newGifts);
-          setInitialLoad(false);
+          giftsLoaded = true;
+          checkBothLoaded();
         });
+        subscriptions.push(unsubscribeGifts);
       }
 
-      // Cleanup subscription on unmount or when app changes
+      // Cleanup function
       return () => {
-        unsubscribe();
-        unsubscribe2();
-        unsubscribe3();
+        subscriptions.forEach(unsub => unsub());
       };
     }
   }, [user, currentApp]);
 
-  if (loading || initialLoad) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-muted/40">
         <Loader2 className="h-8 w-8 animate-spin" />
