@@ -109,7 +109,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     }));
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -120,7 +120,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     });
 
     const reader = new FileReader();
-    reader.readAsDataURL(file);
+
     reader.onload = async () => {
       try {
         const photoDataUri = reader.result as string;
@@ -130,8 +130,8 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
           id: new Date().toISOString() + Math.random(),
           name: item.name,
           category: item.category,
-          quantity: 1, // Default quantity
-          price: 0, // Default price
+          quantity: 1,
+          price: 0,
           status: 'Need to Order',
           orderHistory: [],
         }));
@@ -150,21 +150,23 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         });
       } finally {
         setIsProcessingImage(false);
-        // Reset file input
-        if(fileInputRef.current) {
-            fileInputRef.current.value = "";
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
         }
       }
     };
+
     reader.onerror = (error) => {
-        console.error("Error reading file:", error);
-        toast({
-          variant: "destructive",
-          title: "File Read Error",
-          description: "Could not read the selected file.",
-        });
-        setIsProcessingImage(false);
+      console.error("Error reading file:", error);
+      toast({
+        variant: "destructive",
+        title: "File Read Error",
+        description: "Could not read the selected file.",
+      });
+      setIsProcessingImage(false);
     };
+    
+    reader.readAsDataURL(file);
   };
   
   const shoppingList = items.filter((item) => item.status === "Need to Order");
@@ -182,7 +184,6 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     setEditingItem(undefined);
     setIsAddItemDialogOpen(true);
   }
-
 
   const handleCategoryClick = (category: Category) => {
     setSelectedCategory(category);
@@ -306,7 +307,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 <Card className="mt-4">
                     <CardHeader className="pt-4">
                       <CardTitle>All Items</CardTitle>
-                    </Header>
+                    </CardHeader>
                     <CardContent>
                         <GroceryItemListing 
                            items={items} 
@@ -323,3 +324,4 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     </div>
   );
 }
+ 
