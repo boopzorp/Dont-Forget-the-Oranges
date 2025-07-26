@@ -305,143 +305,147 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         onChange={handleImageUpload} 
       />
 
-      <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b bg-background px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-            <Logo />
-            <div className="font-headline text-xl hidden sm:block">
-              Don't Forget the Oranges!
-            </div>
-        </Link>
-        <div className="ml-auto flex items-center gap-2 md:gap-4">
-           <Select onValueChange={(value) => setCurrency(CURRENCIES.find(c => c.code === value) || CURRENCIES[0])} value={currency.code}>
-              <SelectTrigger className="w-[100px] md:w-[120px]">
-                <SelectValue placeholder="Currency" />
-              </SelectTrigger>
-              <SelectContent>
-                {CURRENCIES.map(c => <SelectItem key={c.code} value={c.code}>{c.code} ({c.symbol})</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isProcessingImage}>
-                {isProcessingImage ? (
-                    <Loader2 className="h-4 w-4 animate-spin md:mr-2" />
-                ) : (
-                    <Upload className="h-4 w-4 md:mr-2" />
-                )}
-                <span className="hidden md:inline">Upload List</span>
+      <header className="sticky top-0 z-30 flex h-20 items-center border-b bg-background">
+        <div className="container mx-auto flex h-full items-center gap-4 px-4 sm:px-6">
+          <Link href="/" className="flex items-center gap-2">
+              <Logo />
+              <div className="font-headline text-xl hidden sm:block">
+                Don't Forget the Oranges!
+              </div>
+          </Link>
+          <div className="ml-auto flex items-center gap-2 md:gap-4">
+            <Select onValueChange={(value) => setCurrency(CURRENCIES.find(c => c.code === value) || CURRENCIES[0])} value={currency.code}>
+                <SelectTrigger className="w-[100px] md:w-[120px]">
+                  <SelectValue placeholder="Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map(c => <SelectItem key={c.code} value={c.code}>{c.code} ({c.symbol})</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isProcessingImage}>
+                  {isProcessingImage ? (
+                      <Loader2 className="h-4 w-4 animate-spin md:mr-2" />
+                  ) : (
+                      <Upload className="h-4 w-4 md:mr-2" />
+                  )}
+                  <span className="hidden md:inline">Upload List</span>
+              </Button>
+              <Button size="sm" onClick={openNewItemDialog}>
+                  <PlusCircle className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Add Item</span>
             </Button>
-            <Button size="sm" onClick={openNewItemDialog}>
-                <PlusCircle className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Add Item</span>
-          </Button>
-          <ThemeToggleButton />
-          <Button variant="ghost" size="icon" onClick={signOut}>
-            <LogOut className="h-4 w-4" />
-          </Button>
+            <ThemeToggleButton />
+            <Button variant="ghost" size="icon" onClick={signOut}>
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col gap-4 p-2 md:p-8">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="lg:col-span-4">
-            <CardHeader>
-              <CardTitle>Spending Overview</CardTitle>
-              <CardDescription>
-                Your monthly grocery spending by category. Click a bar to see details.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pl-2">
-              <SpendAnalysisChart 
-                items={items} 
-                onCategoryClick={handleCategoryClick} 
-                selectedMonth={selectedMonth}
-                onMonthChange={setSelectedMonth}
-                currency={currency}
-              />
-            </CardContent>
-          </Card>
-          <Card className="lg:col-span-3">
-             <CardHeader>
-              <CardTitle>Spending by Group</CardTitle>
-              <CardDescription>
-                Your monthly grocery spending by custom group.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <GroupSpendChart 
-                items={items} 
-                selectedMonth={selectedMonth}
-                currency={currency}
-              />
-            </CardContent>
-          </Card>
-        </div>
+      <main className="flex-1">
+        <div className="container mx-auto space-y-4 p-4 sm:p-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="lg:col-span-4">
+              <CardHeader>
+                <CardTitle>Spending Overview</CardTitle>
+                <CardDescription>
+                  Your monthly grocery spending by category. Click a bar to see details.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <SpendAnalysisChart 
+                  items={items} 
+                  onCategoryClick={handleCategoryClick} 
+                  selectedMonth={selectedMonth}
+                  onMonthChange={setSelectedMonth}
+                  currency={currency}
+                />
+              </CardContent>
+            </Card>
+            <Card className="lg:col-span-3">
+              <CardHeader>
+                <CardTitle>Spending by Group</CardTitle>
+                <CardDescription>
+                  Your monthly grocery spending by custom group.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <GroupSpendChart 
+                  items={items} 
+                  selectedMonth={selectedMonth}
+                  currency={currency}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-        <Tabs defaultValue="shopping-list">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="shopping-list">Shopping List ({shoppingList.length})</TabsTrigger>
-              <TabsTrigger value="all-items">All Items ({items.length})</TabsTrigger>
-              <TabsTrigger value="calendar-view">Calendar</TabsTrigger>
-            </TabsList>
-            <TabsContent value="shopping-list">
-               <Card className="mt-4">
-                  <CardHeader className="pt-4">
-                      <CardTitle>Shopping List</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {shoppingList.length > 0 ? (
-                        <GroceryItemListing 
-                          items={shoppingList} 
-                          currency={currency}
-                          handleStatusChange={handleStatusChange}
-                          handleDeleteItem={(itemId) => handleDeleteItem(itemId, true)}
-                          openEditDialog={openEditDialog}
-                          isShoppingList={true}
-                        />
-                    ) : (
-                        <div className="text-center py-10 text-muted-foreground">
-                            <p>Your shopping list is empty!</p>
-                            <p className="text-sm">Items marked "Need to Order" will appear here.</p>
-                        </div>
-                    )}
-                  </CardContent>
-                  <CardFooter className="justify-end gap-2 border-t pt-4">
-                    <span className="text-lg font-semibold">Total:</span>
-                    <span className="text-xl font-bold text-primary">
-                       {formatCurrency(shoppingListTotal, currency)}
-                    </span>
-                  </CardFooter>
-               </Card>
-            </TabsContent>
-            <TabsContent value="all-items">
+          <Tabs defaultValue="shopping-list">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="shopping-list">Shopping List ({shoppingList.length})</TabsTrigger>
+                <TabsTrigger value="all-items">All Items ({items.length})</TabsTrigger>
+                <TabsTrigger value="calendar-view">Calendar</TabsTrigger>
+              </TabsList>
+              <TabsContent value="shopping-list">
                 <Card className="mt-4">
                     <CardHeader className="pt-4">
-                      <CardTitle>All Items</CardTitle>
+                        <CardTitle>Shopping List</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <GroceryItemListing 
-                           items={items} 
-                           currency={currency}
-                           handleStatusChange={handleStatusChange}
-                           handleDeleteItem={(itemId) => handleDeleteItem(itemId, false)}
-                           openEditDialog={openEditDialog}
-                        />
+                      {shoppingList.length > 0 ? (
+                          <GroceryItemListing 
+                            items={shoppingList} 
+                            currency={currency}
+                            handleStatusChange={handleStatusChange}
+                            handleDeleteItem={(itemId) => handleDeleteItem(itemId, true)}
+                            openEditDialog={openEditDialog}
+                            isShoppingList={true}
+                          />
+                      ) : (
+                          <div className="text-center py-10 text-muted-foreground">
+                              <p>Your shopping list is empty!</p>
+                              <p className="text-sm">Items marked "Need to Order" will appear here.</p>
+                          </div>
+                      )}
                     </CardContent>
+                    <CardFooter className="justify-end gap-2 border-t pt-4">
+                      <span className="text-lg font-semibold">Total:</span>
+                      <span className="text-xl font-bold text-primary">
+                        {formatCurrency(shoppingListTotal, currency)}
+                      </span>
+                    </CardFooter>
                 </Card>
-            </TabsContent>
-             <TabsContent value="calendar-view">
-                <Card className="mt-4">
-                    <CardHeader className="pt-4">
-                      <CardTitle>Purchase Calendar</CardTitle>
-                       <CardDescription>
-                        Days you went grocery shopping are highlighted.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <CalendarView items={items} />
-                    </CardContent>
-                </Card>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+              <TabsContent value="all-items">
+                  <Card className="mt-4">
+                      <CardHeader className="pt-4">
+                        <CardTitle>All Items</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                          <GroceryItemListing 
+                            items={items} 
+                            currency={currency}
+                            handleStatusChange={handleStatusChange}
+                            handleDeleteItem={(itemId) => handleDeleteItem(itemId, false)}
+                            openEditDialog={openEditDialog}
+                          />
+                      </CardContent>
+                  </Card>
+              </TabsContent>
+              <TabsContent value="calendar-view">
+                  <Card className="mt-4">
+                      <CardHeader className="pt-4">
+                        <CardTitle>Purchase Calendar</CardTitle>
+                        <CardDescription>
+                          Days you went grocery shopping are highlighted.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                          <CalendarView items={items} />
+                      </CardContent>
+                  </Card>
+              </TabsContent>
+            </Tabs>
+        </div>
       </main>
     </div>
   );
