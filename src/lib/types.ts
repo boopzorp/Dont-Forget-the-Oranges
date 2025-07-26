@@ -1,4 +1,4 @@
-export type Category = 'Pantry' | 'Produce' | 'Dairy' | 'Meat' | 'Bakery' | 'Frozen' | 'Other';
+export type Category = 'Pantry' | 'Produce' | 'Dairy' | 'Meat' | 'Bakery' | 'Frozen' | 'Cleaning' | 'Other';
 
 export type StockStatus = 'In Stock' | 'Need to Order' | "Don't Need" | "Out of Stock";
 

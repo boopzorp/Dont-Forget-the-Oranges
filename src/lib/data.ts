@@ -8,6 +8,7 @@ export const CATEGORIES: { name: Category; emoji: string }[] = [
   { name: 'Meat', emoji: '🥩' },
   { name: 'Bakery', emoji: '🍞' },
   { name: 'Frozen', emoji: '🧊' },
+  { name: 'Cleaning', emoji: '🧼' },
   { name: 'Other', emoji: '🛒' },
 ];
 
