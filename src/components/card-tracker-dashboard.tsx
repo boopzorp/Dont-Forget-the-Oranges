@@ -5,7 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { format, formatDistanceToNow, getYear } from "date-fns";
-import { Gift, LogOut, Menu, PlusCircle, CalendarDays, Users, Package, MoreHorizontal, Trash2, Pencil } from "lucide-react";
+import { LogOut, Menu, PlusCircle, CalendarDays, Users, Package, MoreHorizontal, Trash2, Pencil } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -169,7 +169,7 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
   }
 
   return (
-    <>
+    <div className="theme-gifts">
       <AddEventDialog
         isOpen={isEventDialogOpen}
         onOpenChange={setIsEventDialogOpen}
@@ -339,6 +339,6 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
           </div>
         </main>
       </div>
-    </>
+    </div>
   );
 }
