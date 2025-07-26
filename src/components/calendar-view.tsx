@@ -17,10 +17,14 @@ export function CalendarView({ items }: CalendarViewProps) {
     const dates = new Set<string>();
     items.forEach(item => {
       item.orderHistory.forEach(order => {
-        dates.add(order.date.toISOString().split('T')[0]);
+        // Get YYYY-MM-DD in UTC to avoid timezone shifts
+        const utcDate = new Date(Date.UTC(order.date.getFullYear(), order.date.getMonth(), order.date.getDate()));
+        dates.add(utcDate.toISOString().split('T')[0]);
       });
     });
-    return Array.from(dates).map(d => new Date(d));
+    // When creating dates from the string, explicitly tell new Date() it's a UTC date string
+    // by adding 'T00:00:00Z' to avoid it being parsed as local time.
+    return Array.from(dates).map(d => new Date(`${d}T00:00:00Z`));
   }, [items]);
 
   const modifiers = {
