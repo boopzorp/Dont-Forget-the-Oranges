@@ -33,8 +33,8 @@ export function LandingPage() {
         <div className="container flex h-20 items-center">
           <Link href="/" className="flex items-center gap-2 mr-auto">
             <Logo />
-            <div className="font-headline text-lg leading-tight hidden sm:block">
-              Don't Forget<br/>the Oranges!
+            <div className="font-headline text-xl hidden sm:block">
+              Don't Forget the Oranges!
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">

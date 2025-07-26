@@ -34,8 +34,8 @@ export default function LoginPage() {
          <div className="flex justify-center mb-6">
           <Link href="/" className="flex items-center gap-2">
             <Logo />
-            <div className="font-headline text-2xl leading-tight">
-              Don't Forget<br/>the Oranges!
+            <div className="font-headline text-3xl">
+              Don't Forget the Oranges!
             </div>
           </Link>
         </div>

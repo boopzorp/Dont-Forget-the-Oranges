@@ -292,8 +292,8 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
       <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-2">
             <Logo />
-            <div className="font-headline text-lg leading-tight hidden md:block">
-              Don't Forget<br/>the Oranges!
+            <div className="font-headline text-2xl hidden md:block">
+              Don't Forget the Oranges!
             </div>
         </div>
         <div className="ml-auto flex items-center gap-2 md:gap-4">
