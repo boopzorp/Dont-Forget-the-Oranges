@@ -14,3 +14,13 @@ export function formatCurrency(amount: number, currency: Currency, fractionDigit
     maximumFractionDigits: fractionDigits,
   }).format(amount);
 }
+
+// Creates a YYYY-MM-DD string from a Date object, ignoring timezone.
+export const toDateString = (date: Date): string => {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(date.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+    

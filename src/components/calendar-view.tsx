@@ -5,23 +5,24 @@ import * as React from "react";
 import { format, getMonth, getYear, parseISO, startOfDay } from 'date-fns';
 import { Calendar } from "@/components/ui/calendar";
 import type { GroceryItem, Currency, Order } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, toDateString } from "@/lib/utils";
 import { PurchaseDetailDialog } from "./purchase-detail-dialog";
 
 interface CalendarViewProps {
   items: GroceryItem[];
   currency: Currency;
+  onDeleteByDateAndGroup: (date: Date, group: string) => void;
 }
 
 // Helper to get a YYYY-MM-DD string from a date, ignoring timezone.
-const toDateString = (date: Date): string => {
+const toLocalDateString = (date: Date): string => {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 
-export function CalendarView({ items, currency }: CalendarViewProps) {
+export function CalendarView({ items, currency, onDeleteByDateAndGroup }: CalendarViewProps) {
   const [month, setMonth] = React.useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [purchasesForSelectedDate, setPurchasesForSelectedDate] = React.useState<Order[]>([]);
@@ -62,7 +63,7 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
     if (!date) return;
     
     // Convert the selected local date into our timezone-agnostic string key
-    const dateKey = toDateString(date);
+    const dateKey = toLocalDateString(date);
 
     const purchases = purchasesByDate.get(dateKey);
     
@@ -94,6 +95,13 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
         </div>
     )
   }
+  
+  const handleDelete = (group: string) => {
+    if (selectedDate) {
+      onDeleteByDateAndGroup(selectedDate, group);
+      setSelectedDate(null); // Close dialog after deletion
+    }
+  };
 
   return (
     <>
@@ -104,6 +112,7 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
           date={selectedDate}
           orders={purchasesForSelectedDate}
           currency={currency}
+          onDelete={handleDelete}
         />
       )}
       <div className="flex flex-col items-center gap-4">
@@ -124,3 +133,5 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
     </>
   );
 }
+
+    

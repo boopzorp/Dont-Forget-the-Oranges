@@ -31,7 +31,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { GroceryItem, Category, StockStatus, Currency } from "@/lib/types";
 import { CURRENCIES, getAvailableMonths } from "@/lib/data";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, toDateString } from "@/lib/utils";
 import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
 import { GroupSpendChart } from "@/components/group-spend-chart";
 import { CalendarView } from "@/components/calendar-view";
@@ -120,6 +120,47 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
           variant: "destructive"
         });
       }
+    }
+  };
+
+  const handleDeleteByDateAndGroup = async (date: Date, group: string) => {
+    if (!user) return;
+
+    const dateKeyToDelete = toDateString(date);
+    const itemsToUpdate: GroceryItem[] = [];
+
+    items.forEach(item => {
+      const originalHistoryLength = item.orderHistory.length;
+      const newOrderHistory = item.orderHistory.filter(order => {
+        const orderDateKey = toDateString(order.date);
+        if (orderDateKey !== dateKeyToDelete) {
+          return true; // Keep orders from other dates
+        }
+        // For the target date, check the group
+        if (group === "All") {
+          return false; // Delete all entries for this date
+        }
+        return order.group !== group; // Keep if group doesn't match
+      });
+
+      if (newOrderHistory.length < originalHistoryLength) {
+        itemsToUpdate.push({ ...item, orderHistory: newOrderHistory });
+      }
+    });
+
+    if (itemsToUpdate.length > 0) {
+      const updatePromises = itemsToUpdate.map(item => updateItem(user.uid, item));
+      await Promise.all(updatePromises);
+      toast({
+        title: "Entries Deleted",
+        description: `Purchase history for ${format(date, 'PPP')} (${group}) has been removed.`,
+      });
+    } else {
+       toast({
+        variant: "destructive",
+        title: "No Entries Found",
+        description: `No purchase history found for ${format(date, 'PPP')} with the group '${group}'.`,
+      });
     }
   };
 
@@ -567,7 +608,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                          <CalendarView items={items} currency={currency} />
+                          <CalendarView items={items} currency={currency} onDeleteByDateAndGroup={handleDeleteByDateAndGroup} />
                       </CardContent>
                   </Card>
               </TabsContent>
@@ -577,3 +618,5 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     </div>
   );
 }
+
+    
