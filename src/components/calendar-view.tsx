@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { format, getMonth, getYear, isSameDay, parseISO, startOfUTCDay } from 'date-fns';
+import { format, getMonth, getYear, isSameDay, parseISO, startOfDay } from 'date-fns';
 import { Calendar } from "@/components/ui/calendar";
 import type { GroceryItem, Currency, Order } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
@@ -37,15 +37,15 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
 
         // Calculate total spend for the currently viewed month
         // We compare UTC months and years to be consistent
-        const orderDateInUTC = startOfUTCDay(order.date);
-        if (getMonth(orderDateInUTC) === getMonth(month) && getYear(orderDateInUTC) === getYear(month)) {
+        const orderDate = startOfDay(order.date);
+        if (getMonth(orderDate) === getMonth(month) && getYear(orderDate) === getYear(month)) {
           spend += order.price * order.quantity;
         }
       });
     });
     
     // Create Date objects from the UTC date strings for the calendar
-    const purchaseDateObjects = Array.from(dates).map(d => parseISO(d));
+    const purchaseDateObjects = Array.from(dates).map(d => parseISO(`${d}T00:00:00Z`));
 
     return {
       purchaseDates: purchaseDateObjects,
