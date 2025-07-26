@@ -73,19 +73,19 @@ export function LandingPage() {
               <Link href="/login">Okay, I'm Intrigued <ArrowRight className="ml-2 h-5 w-5" /></Link>
             </Button>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="mt-12"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Image 
+            <Image
               src="/my-banner.png"
               alt="App Screenshot"
               width={1200}
               height={600}
               data-ai-hint="app dashboard"
-              className="rounded-xl shadow-2xl border"
+              className="rounded-xl shadow-2xl border w-full h-auto object-cover"
             />
           </motion.div>
         </section>
@@ -98,19 +98,19 @@ export function LandingPage() {
               <p className="text-muted-foreground mt-4">We turn your "Oh, what was that thing?" into "Got it!" Here's how we help you (finally) remember the oranges.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
-              <FeatureCard 
+              <FeatureCard
                 icon={<UploadCloud size={24} />}
                 title="Scribbles to Lists"
                 description="Snap a picture of your weirdest, messiest grocery list. Our AI isn't scared. It'll digitize it in seconds."
                 delay={0.2}
               />
-              <FeatureCard 
+              <FeatureCard
                 icon={<CheckCircle size={24} />}
                 title="Aisle-by-Aisle Sanity"
                 description="No more backtracking for the ketchup. We automatically sort your items by category to save your steps (and your sanity)."
                 delay={0.3}
               />
-              <FeatureCard 
+              <FeatureCard
                 icon={<BarChart2 size={24} />}
                 title="Be a Budget Genius"
                 description="Wondering where all your money went? (Hint: it was cheese.) See your spending habits with charts so simple, they're beautiful."
