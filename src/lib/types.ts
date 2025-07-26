@@ -1,6 +1,4 @@
 
-
-
 export type Category = 'Pantry' | 'Produce' | 'Dairy' | 'Meat' | 'Bakery' | 'Frozen' | 'Cleaning' | 'Snacks' | 'Other';
 
 export type StockStatus = 'In Stock' | 'Need to Order' | "Don't Need" | "Out of Stock";
@@ -38,6 +36,7 @@ export type ShoppingEvent = {
     date: Date;
     category: EventCategory;
     notes?: string;
+    emoji?: string;
     displayDate?: Date; // Added for sorting logic, not stored in DB
 };
 
@@ -52,5 +51,3 @@ export type GiftItem = {
 };
 
 export type AppName = 'groceries' | 'gifts';
-
-    

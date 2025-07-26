@@ -75,6 +75,7 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
         toast({ title: "Event Added", description: `${eventData.name} has been added to your calendar.` });
       }
     } catch (error) {
+      console.error(error);
       toast({ variant: "destructive", title: "Error", description: "Could not save the event." });
     }
   };
@@ -261,7 +262,13 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                     {sortedEvents.slice(0, 5).map(event => (
                       <li key={event.id} className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <CalendarDays className="h-5 w-5 text-muted-foreground" />
+                             <div className="text-2xl w-8 text-center">
+                                {event.emoji ? (
+                                    <span>{event.emoji}</span>
+                                ) : (
+                                    <CalendarDays className="h-5 w-5 text-muted-foreground" />
+                                )}
+                            </div>
                             <div>
                                 <p className="font-semibold">{event.name}</p>
                                 <div className="flex items-center gap-2">

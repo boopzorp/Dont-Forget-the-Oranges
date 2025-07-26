@@ -1,6 +1,3 @@
-
-
-
 import {
   collection,
   addDoc,
@@ -48,6 +45,7 @@ const eventToFirestore = (event: Omit<ShoppingEvent, 'id'> | ShoppingEvent) => {
     date: Timestamp.fromDate(event.date),
     category: event.category,
     notes: event.notes || '',
+    emoji: event.emoji || '',
   };
 };
 
@@ -59,6 +57,7 @@ const eventFromFirestore = (snapshot: any): ShoppingEvent => {
     date: data.date.toDate(),
     category: data.category || "Other", // Default to 'Other' if not present
     notes: data.notes,
+    emoji: data.emoji,
   } as ShoppingEvent;
 };
 
