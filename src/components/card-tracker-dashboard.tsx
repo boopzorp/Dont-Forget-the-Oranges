@@ -5,7 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { format, formatDistanceToNow, getYear } from "date-fns";
-import { LogOut, Menu, PlusCircle, CalendarDays, Users, Package, MoreHorizontal, Trash2, Pencil } from "lucide-react";
+import { LogOut, Menu, PlusCircle, CalendarDays, Users, Package, MoreHorizontal, Trash2, Pencil, Archive } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -19,6 +19,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   Select,
   SelectContent,
@@ -140,37 +146,42 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
     setIsGiftDialogOpen(true);
   };
 
-  const sortedEvents = React.useMemo(() => {
+  const { upcomingEvents, pastEvents } = React.useMemo(() => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize today's date for accurate comparison
+    today.setHours(0, 0, 0, 0);
 
-    return events
-      .map(event => {
-        let nextOccurrence = new Date(event.date);
-        const isRecurring = event.category === "Birthday" || event.category === "Anniversary";
+    const upcoming: ShoppingEvent[] = [];
+    const past: ShoppingEvent[] = [];
 
-        if (isRecurring) {
-          // If the event has passed this year, set it to next year
+    events.forEach(event => {
+      let nextOccurrence = new Date(event.date);
+      const isRecurring = event.category === "Birthday" || event.category === "Anniversary";
+
+      if (isRecurring) {
+        if (nextOccurrence < today) {
+          nextOccurrence.setFullYear(getYear(today) + 1);
+        }
+        if (getYear(nextOccurrence) < getYear(today)) {
+          nextOccurrence.setFullYear(getYear(today));
           if (nextOccurrence < today) {
             nextOccurrence.setFullYear(getYear(today) + 1);
           }
-          // If the event date was for a previous year but is still in the future this year, update it
-          if (getYear(nextOccurrence) < getYear(today)) {
-             nextOccurrence.setFullYear(getYear(today));
-             // Re-check if it's now in the past after year correction
-             if (nextOccurrence < today) {
-               nextOccurrence.setFullYear(getYear(today) + 1);
-             }
-          }
         }
-        
-        return { ...event, displayDate: nextOccurrence };
-      })
-      .filter(event => {
-        // Filter out past, non-recurring events
-        return event.displayDate >= today || event.category === "Birthday" || event.category === "Anniversary";
-      })
-      .sort((a, b) => a.displayDate.getTime() - b.displayDate.getTime());
+        upcoming.push({ ...event, displayDate: nextOccurrence });
+      } else {
+        // Non-recurring events
+        if (nextOccurrence >= today) {
+          upcoming.push({ ...event, displayDate: nextOccurrence });
+        } else {
+          past.push({ ...event, displayDate: nextOccurrence });
+        }
+      }
+    });
+
+    upcoming.sort((a, b) => a.displayDate!.getTime() - b.displayDate!.getTime());
+    past.sort((a, b) => b.displayDate!.getTime() - a.displayDate!.getTime());
+
+    return { upcomingEvents: upcoming, pastEvents: past };
   }, [events]);
 
 
@@ -188,6 +199,54 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
         return "outline";
     }
   }
+
+  const EventListItem = ({ event }: { event: ShoppingEvent }) => (
+     <li className="flex items-center justify-between">
+        <button className="flex items-center gap-4 text-left flex-1" onClick={() => setSelectedEvent(event)}>
+            <div className="text-2xl w-8 text-center">
+              {event.emoji ? (
+                  <span>{event.emoji}</span>
+              ) : (
+                  <CalendarDays className="h-5 w-5 text-muted-foreground" />
+              )}
+          </div>
+          <div>
+              <p className="font-semibold">{event.name}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">{format(event.displayDate || event.date, "MMMM do, yyyy")}</p>
+                <Badge variant={getCategoryBadgeVariant(event.category)}>{event.category}</Badge>
+              </div>
+          </div>
+        </button>
+        <div className="flex items-center gap-2 pl-2">
+          {event.displayDate && event.displayDate >= new Date() && (
+            <p className="font-semibold text-primary hidden sm:block">{formatDistanceToNow(event.displayDate, { addSuffix: true })}</p>
+          )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">More actions</span>
+                  </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => openEditEventDialog(event)}>
+                      <Pencil className="mr-2 h-4 w-4" /> Edit
+                  </DropdownMenuItem>
+                  <ConfirmDeleteDialog
+                      onConfirm={() => handleDeleteEvent(event.id)}
+                      title="Delete Event?"
+                      description={`Are you sure you want to delete the event "${event.name}"? This action cannot be undone.`}
+                  >
+                      <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-600 px-2 py-1.5 h-auto text-sm font-normal relative flex cursor-default select-none items-center rounded-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                          <Trash2 className="mr-2 h-4 w-4" /> Delete
+                      </Button>
+                  </ConfirmDeleteDialog>
+              </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+    </li>
+  );
 
   return (
     <div className="theme-gifts">
@@ -286,53 +345,11 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                 <CardDescription>Don't forget these important dates!</CardDescription>
               </CardHeader>
               <CardContent>
-                {sortedEvents.length > 0 ? (
+                {upcomingEvents.length > 0 ? (
                   <ScrollArea className="h-72">
                     <ul className="space-y-4 pr-4">
-                      {sortedEvents.map(event => (
-                        <li key={event.id} className="flex items-center justify-between">
-                            <button className="flex items-center gap-4 text-left flex-1" onClick={() => setSelectedEvent(event)}>
-                               <div className="text-2xl w-8 text-center">
-                                  {event.emoji ? (
-                                      <span>{event.emoji}</span>
-                                  ) : (
-                                      <CalendarDays className="h-5 w-5 text-muted-foreground" />
-                                  )}
-                              </div>
-                              <div>
-                                  <p className="font-semibold">{event.name}</p>
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-sm text-muted-foreground">{format(event.displayDate, "MMMM do, yyyy")}</p>
-                                    <Badge variant={getCategoryBadgeVariant(event.category)}>{event.category}</Badge>
-                                  </div>
-                              </div>
-                            </button>
-                            <div className="flex items-center gap-2 pl-2">
-                              <p className="font-semibold text-primary hidden sm:block">{formatDistanceToNow(event.displayDate, { addSuffix: true })}</p>
-                               <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                                          <MoreHorizontal className="h-4 w-4" />
-                                          <span className="sr-only">More actions</span>
-                                      </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                      <DropdownMenuItem onClick={() => openEditEventDialog(event)}>
-                                          <Pencil className="mr-2 h-4 w-4" /> Edit
-                                      </DropdownMenuItem>
-                                      <ConfirmDeleteDialog
-                                          onConfirm={() => handleDeleteEvent(event.id)}
-                                          title="Delete Event?"
-                                          description={`Are you sure you want to delete the event "${event.name}"? This action cannot be undone.`}
-                                      >
-                                          <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-600 px-2 py-1.5 h-auto text-sm font-normal relative flex cursor-default select-none items-center rounded-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-                                              <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                          </Button>
-                                      </ConfirmDeleteDialog>
-                                  </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                        </li>
+                      {upcomingEvents.map(event => (
+                        <EventListItem key={event.id} event={event} />
                       ))}
                     </ul>
                   </ScrollArea>
@@ -341,6 +358,27 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                     <p>No upcoming events.</p>
                     <p className="text-sm">Click "Add Event" to get started.</p>
                   </div>
+                )}
+                 {pastEvents.length > 0 && (
+                    <Accordion type="single" collapsible className="w-full mt-4">
+                        <AccordionItem value="item-1">
+                            <AccordionTrigger>
+                                <div className="flex items-center gap-2">
+                                    <Archive className="h-4 w-4" />
+                                    Archived Events ({pastEvents.length})
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                                <ScrollArea className="h-60">
+                                    <ul className="space-y-4 pr-4">
+                                        {pastEvents.map(event => (
+                                            <EventListItem key={event.id} event={event} />
+                                        ))}
+                                    </ul>
+                                </ScrollArea>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
                 )}
               </CardContent>
             </Card>
