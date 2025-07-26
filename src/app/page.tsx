@@ -1,10 +1,9 @@
-import { DUMMY_GROCERIES } from '@/lib/data';
-import { GroceryDashboard } from '@/components/grocery-dashboard';
+import { LandingPage } from '@/components/landing-page';
 
 export default function Home() {
   return (
     <main>
-      <GroceryDashboard initialItems={DUMMY_GROCERIES} />
+      <LandingPage />
     </main>
   );
 }
