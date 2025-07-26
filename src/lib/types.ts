@@ -28,11 +28,14 @@ export type Currency = {
     symbol: string;
 }
 
+export type EventCategory = "Birthday" | "Anniversary" | "Other";
+
 // "Don't Forget the Card!" Types
 export type ShoppingEvent = {
     id: string;
     name: string; // e.g., "Mom's Birthday"
     date: Date;
+    category: EventCategory;
     notes?: string;
 };
 

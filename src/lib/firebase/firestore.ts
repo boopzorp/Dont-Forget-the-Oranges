@@ -11,7 +11,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from './config';
-import type { GroceryItem, ShoppingEvent, GiftItem } from '../types';
+import type { GroceryItem, ShoppingEvent, GiftItem, EventCategory } from '../types';
 
 const GROCERY_COLLECTION = 'groceries';
 const EVENTS_COLLECTION = 'events';
@@ -49,8 +49,10 @@ const eventFromFirestore = (snapshot: any): ShoppingEvent => {
   const data = snapshot.data();
   return {
     id: snapshot.id,
-    ...data,
+    name: data.name,
     date: data.date.toDate(),
+    category: data.category || "Other", // Default to 'Other' if not present
+    notes: data.notes,
   } as ShoppingEvent;
 };
 

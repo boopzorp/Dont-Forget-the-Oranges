@@ -30,6 +30,7 @@ import { AddEventDialog } from "./add-event-dialog";
 import { AddGiftDialog } from "./add-gift-dialog";
 import { formatCurrency } from "@/lib/utils";
 import { CURRENCIES } from "@/lib/data";
+import { Badge } from "@/components/ui/badge";
 
 interface CardTrackerDashboardProps {
   events: ShoppingEvent[];
@@ -95,6 +96,17 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
     [...gifts].sort((a,b) => b.purchaseDate.getTime() - a.purchaseDate.getTime()),
   [gifts]);
 
+  const getCategoryBadgeVariant = (category: string) => {
+    switch (category) {
+      case "Birthday":
+        return "default";
+      case "Anniversary":
+        return "secondary";
+      default:
+        return "outline";
+    }
+  }
+
   return (
     <>
       <AddEventDialog
@@ -137,7 +149,7 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                   </Button>
                 </SheetTrigger>
                 <SheetContent>
-                  <SheetHeader>
+                   <SheetHeader>
                     <SheetTitle className="sr-only">Main Menu</SheetTitle>
                   </SheetHeader>
                   <nav className="grid gap-4 text-lg font-medium mt-8">
@@ -177,7 +189,10 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                             <CalendarDays className="h-5 w-5 text-muted-foreground" />
                             <div>
                                 <p className="font-semibold">{event.name}</p>
-                                <p className="text-sm text-muted-foreground">{format(event.date, "MMMM do, yyyy")}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm text-muted-foreground">{format(event.date, "MMMM do, yyyy")}</p>
+                                  <Badge variant={getCategoryBadgeVariant(event.category)}>{event.category}</Badge>
+                                </div>
                             </div>
                           </div>
                           <p className="font-semibold text-primary">{formatDistanceToNow(event.date, { addSuffix: true })}</p>
