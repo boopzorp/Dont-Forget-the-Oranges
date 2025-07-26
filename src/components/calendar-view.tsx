@@ -54,10 +54,13 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
   
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
-    // Convert selected date to YYYY-MM-DD format, compensating for timezone offset
-    const tzOffset = date.getTimezoneOffset() * 60000;
-    const localDate = new Date(date.getTime() - tzOffset);
-    const dateKey = localDate.toISOString().slice(0, 10);
+    
+    // Format the selected date (which is in local time) to a YYYY-MM-DD string key
+    // This avoids timezone shifting issues.
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const dateKey = `${year}-${month}-${day}`;
 
     const purchases = purchasesByDate.get(dateKey);
     
