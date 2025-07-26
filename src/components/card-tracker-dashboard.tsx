@@ -102,7 +102,18 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
         toast({ title: "Gift Added", description: `${giftData.name} has been tracked.` });
       }
     } catch (error) {
+      console.error(error);
       toast({ variant: "destructive", title: "Error", description: "Could not save the gift." });
+    }
+  };
+  
+  const handleDeleteGift = async (giftId: string) => {
+    if (!user) return;
+    try {
+      await deleteGiftItem(user.uid, giftId);
+      toast({ title: "Gift Deleted", description: "The gift has been removed." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "Could not delete the gift." });
     }
   };
 
@@ -118,6 +129,11 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
   
   const openNewGiftDialog = () => {
     setEditingGift(undefined);
+    setIsGiftDialogOpen(true);
+  };
+  
+  const openEditGiftDialog = (gift: GiftItem) => {
+    setEditingGift(gift);
     setIsGiftDialogOpen(true);
   };
 
@@ -325,7 +341,7 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
               <CardContent>
                 {sortedGifts.length > 0 ? (
                    <ul className="space-y-4">
-                    {sortedGifts.slice(0, 5).map(gift => (
+                    {sortedGifts.map(gift => (
                       <li key={gift.id} className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <Users className="h-5 w-5 text-muted-foreground" />
@@ -334,7 +350,31 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                                 <p className="text-sm text-muted-foreground">For {gift.recipient}</p>
                             </div>
                           </div>
-                          <p className="font-semibold">{formatCurrency(gift.price, currency)}</p>
+                           <div className="flex items-center gap-2">
+                              <p className="font-semibold">{formatCurrency(gift.price, currency)}</p>
+                               <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                          <span className="sr-only">More actions</span>
+                                      </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => openEditGiftDialog(gift)}>
+                                          <Pencil className="mr-2 h-4 w-4" /> Edit
+                                      </DropdownMenuItem>
+                                      <ConfirmDeleteDialog
+                                          onConfirm={() => handleDeleteGift(gift.id)}
+                                          title="Delete Gift?"
+                                          description={`Are you sure you want to delete the gift "${gift.name}" for ${gift.recipient}? This action cannot be undone.`}
+                                      >
+                                          <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-600 px-2 py-1.5 h-auto text-sm font-normal relative flex cursor-default select-none items-center rounded-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                                              <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                          </Button>
+                                      </ConfirmDeleteDialog>
+                                  </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                       </li>
                     ))}
                   </ul>
