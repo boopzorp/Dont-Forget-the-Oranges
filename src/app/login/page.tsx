@@ -1,23 +1,31 @@
 
 "use client"
 
+import * as React from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { LoginForm } from "@/components/login-form"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
+import { Loader2 } from "lucide-react"
 
 export default function LoginPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  if (loading) {
-    return null // or a loading spinner
-  }
+  React.useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard")
+    }
+  }, [user, loading, router])
 
-  if (user) {
-    router.push("/dashboard")
-    return null
+
+  if (loading || user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-muted/40">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
   }
 
   return (
@@ -36,5 +44,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
-    
