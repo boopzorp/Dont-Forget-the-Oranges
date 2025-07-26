@@ -116,7 +116,7 @@ export function GroceryItemListing({
                 )}
               </div>
               <p className="font-bold w-[80px] text-right">
-                {formatCurrency(item.price * item.quantity, currency)}
+                {isShoppingList ? formatCurrency(item.price * item.quantity, currency) : formatCurrency(item.price, currency)}
               </p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
