@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { format, getMonth, getYear, isSameDay } from 'date-fns';
+import { format, getMonth, getYear, isSameDay, parseISO } from 'date-fns';
 import { Calendar } from "@/components/ui/calendar";
 import type { GroceryItem, Currency, Order } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
@@ -25,7 +25,8 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
 
     items.forEach(item => {
       item.orderHistory.forEach(order => {
-        const dateKey = order.date.toISOString().split('T')[0];
+        // Use toISOString and slice to get a stable YYYY-MM-DD key regardless of timezone
+        const dateKey = order.date.toISOString().slice(0, 10);
         
         // Add to set for highlighting
         dates.add(dateKey);
@@ -40,9 +41,12 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
         }
       });
     });
+    
+    // Create Date objects from the UTC date strings for the calendar
+    const purchaseDateObjects = Array.from(dates).map(d => parseISO(`${d}T00:00:00.000Z`));
 
     return {
-      purchaseDates: Array.from(dates).map(d => new Date(`${d}T00:00:00Z`)),
+      purchaseDates: purchaseDateObjects,
       totalSpend: spend,
       purchasesByDate: byDate
     };
@@ -50,14 +54,19 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
   
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
-    const dateKey = date.toISOString().split('T')[0];
-    const purchases = purchasesByDate.get(dateKey);
+    // Convert selected date to YYYY-MM-DD format, compensating for timezone offset
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - tzOffset);
+    const dateKey = localDate.toISOString().slice(0, 10);
 
+    const purchases = purchasesByDate.get(dateKey);
+    
     if (purchases && purchases.length > 0) {
       setPurchasesForSelectedDate(purchases);
       setSelectedDate(date);
     } else {
       setSelectedDate(null);
+      setPurchasesForSelectedDate([]);
     }
   };
 
