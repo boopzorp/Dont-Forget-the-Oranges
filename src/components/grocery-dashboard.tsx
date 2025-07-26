@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { GroceryItem, Category, StockStatus, Currency } from "@/lib/types";
 import { CURRENCIES, CATEGORIES } from "@/lib/data";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
 import { AddItemDialog } from "./add-item-dialog";
 import { CategoryDetailDialog } from "./category-detail-dialog";
