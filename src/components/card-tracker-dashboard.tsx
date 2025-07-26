@@ -20,6 +20,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -27,7 +34,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import type { ShoppingEvent, GiftItem, AppName } from "@/lib/types";
+import type { ShoppingEvent, GiftItem, AppName, Currency } from "@/lib/types";
 import { ThemeToggleButton } from "./theme-toggle-button";
 import { useAuth } from "@/hooks/use-auth";
 import { addShoppingEvent, updateShoppingEvent, deleteShoppingEvent, addGiftItem, updateGiftItem, deleteGiftItem } from "@/lib/firebase/firestore";
@@ -50,7 +57,7 @@ interface CardTrackerDashboardProps {
 export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTrackerDashboardProps) {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
-  const [currency, setCurrency] = React.useState(CURRENCIES[0]); // Default USD for gifts for now
+  const [currency, setCurrency] = React.useState<Currency>(CURRENCIES[1]); // Default to INR
 
   const [isEventDialogOpen, setIsEventDialogOpen] = React.useState(false);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = React.useState(false);
@@ -193,6 +200,14 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
               </div>
             </Link>
             <div className="ml-auto flex items-center gap-2 md:gap-4">
+              <Select onValueChange={(value) => setCurrency(CURRENCIES.find(c => c.code === value) || CURRENCIES[0])} value={currency.code}>
+                <SelectTrigger className="w-[100px] md:w-[120px]">
+                  <SelectValue placeholder="Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map(c => <SelectItem key={c.code} value={c.code}>{c.code} ({c.symbol})</SelectItem>)}
+                </SelectContent>
+              </Select>
               <Button size="sm" variant="outline" onClick={openNewGiftDialog}>
                   <Package className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Add Gift</span>
@@ -327,5 +342,3 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
     </>
   );
 }
-
-    
