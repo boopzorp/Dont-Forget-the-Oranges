@@ -134,14 +134,12 @@ export function GroceryItemListing({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => openEditDialog(item)}>Edit</DropdownMenuItem>
-                  {!isShoppingList && 
-                    <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => handleDeleteItem(item.id)}
-                    >
-                        Delete
-                    </DropdownMenuItem>
-                  }
+                  <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() => handleDeleteItem(item.id)}
+                  >
+                      Delete
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

@@ -68,15 +68,23 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     }
   };
 
-  const handleDeleteItem = (itemId: string) => {
-    const itemToDelete = items.find(item => item.id === itemId);
-    if (itemToDelete) {
-      setItems(items.filter((i) => i.id !== itemId));
-      toast({
-        title: "Item Deleted",
-        description: `${itemToDelete.name} has been removed from your list.`,
-        variant: "destructive"
-      });
+  const handleDeleteItem = (itemId: string, fromShoppingList: boolean) => {
+    const itemToUpdate = items.find(item => item.id === itemId);
+    if (itemToUpdate) {
+      if (fromShoppingList) {
+        handleStatusChange(itemId, "Don't Need");
+        toast({
+          title: "Item Removed",
+          description: `${itemToUpdate.name} has been moved to "Don't Need".`
+        });
+      } else {
+        setItems(items.filter((i) => i.id !== itemId));
+        toast({
+          title: "Item Deleted",
+          description: `${itemToUpdate.name} has been permanently removed.`,
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -199,7 +207,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                           items={shoppingList} 
                           currency={currency}
                           handleStatusChange={handleStatusChange}
-                          handleDeleteItem={handleDeleteItem}
+                          handleDeleteItem={(itemId) => handleDeleteItem(itemId, true)}
                           openEditDialog={openEditDialog}
                           isShoppingList={true}
                         />
@@ -228,7 +236,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                            items={items} 
                            currency={currency}
                            handleStatusChange={handleStatusChange}
-                           handleDeleteItem={handleDeleteItem}
+                           handleDeleteItem={(itemId) => handleDeleteItem(itemId, false)}
                            openEditDialog={openEditDialog}
                         />
                     </CardContent>
