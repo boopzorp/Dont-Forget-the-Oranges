@@ -87,6 +87,7 @@ export function AddItemDialog({ children, onConfirm, itemToEdit, isOpen, onOpenC
     if (isOpen) {
       form.reset(itemToEdit ? {
         ...itemToEdit,
+        price: itemToEdit.price, // Ensure we use the per-unit price
         lastOrdered: itemToEdit.orderHistory.length > 0 ? itemToEdit.orderHistory[itemToEdit.orderHistory.length-1].date : undefined
       } : {
         name: "",
@@ -152,7 +153,7 @@ export function AddItemDialog({ children, onConfirm, itemToEdit, isOpen, onOpenC
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price ({currency.symbol})</FormLabel>
+                    <FormLabel>Price per unit ({currency.symbol})</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" {...field} />
                     </FormControl>

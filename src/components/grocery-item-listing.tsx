@@ -78,7 +78,7 @@ export function GroceryItemListing({
                 <div className="flex-1 overflow-hidden">
                   <p className="font-semibold truncate pr-2">{item.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    Qty: {item.quantity} &bull; {item.category}
+                    {item.category}
                   </p>
                 </div>
               </div>
