@@ -122,7 +122,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     if (itemToUpdate) {
         const updatedItem = { ...itemToUpdate, status };
         if (status === 'In Stock' && itemToUpdate.status !== 'In Stock') {
-            updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price, group: itemToUpdate.defaultGroup || 'Personal', quantity: itemToUpdate.quantity}];
+            updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: itemToUpdate.price, group: itemToUpdate.defaultGroup || 'Personal', quantity: itemToUpdate.quantity}];
             toast({
                 title: "Item Stocked",
                 description: `${itemToUpdate.name} marked as "In Stock" and purchase recorded.`,
@@ -344,7 +344,8 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
 
       <main className="flex-1">
         <div className="container mx-auto space-y-4 p-4 sm:p-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          {/* Desktop view: Grid */}
+          <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-7">
             <Card className="lg:col-span-4">
               <CardHeader>
                 <CardTitle>Spending Overview</CardTitle>
@@ -378,6 +379,53 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
               </CardContent>
             </Card>
           </div>
+          
+          {/* Mobile view: Tabs */}
+          <div className="md:hidden">
+            <Tabs defaultValue="overview">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="overview">Spending Overview</TabsTrigger>
+                <TabsTrigger value="groups">Group Spending</TabsTrigger>
+              </TabsList>
+              <TabsContent value="overview">
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle>Spending Overview</CardTitle>
+                    <CardDescription>
+                      Monthly spending by category. Click a bar for details.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pl-2">
+                    <SpendAnalysisChart 
+                      items={items} 
+                      onCategoryClick={handleCategoryClick} 
+                      selectedMonth={selectedMonth}
+                      onMonthChange={setSelectedMonth}
+                      currency={currency}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="groups">
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle>Spending by Group</CardTitle>
+                    <CardDescription>
+                      Monthly spending by custom group.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <GroupSpendChart 
+                      items={items} 
+                      selectedMonth={selectedMonth}
+                      currency={currency}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+
 
           <Tabs defaultValue="shopping-list">
               <TabsList className="grid w-full grid-cols-3">
@@ -450,3 +498,5 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     </div>
   );
 }
+
+    
