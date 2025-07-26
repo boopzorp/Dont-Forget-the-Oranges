@@ -14,14 +14,6 @@ interface CalendarViewProps {
   onDeleteByDateAndGroup: (date: Date, group: string) => void;
 }
 
-// Helper to get a YYYY-MM-DD string from a date, ignoring timezone.
-const toLocalDateString = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
 export function CalendarView({ items, currency, onDeleteByDateAndGroup }: CalendarViewProps) {
   const [month, setMonth] = React.useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
@@ -62,9 +54,7 @@ export function CalendarView({ items, currency, onDeleteByDateAndGroup }: Calend
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
     
-    // Convert the selected local date into our timezone-agnostic string key
-    const dateKey = toLocalDateString(date);
-
+    const dateKey = toDateString(date);
     const purchases = purchasesByDate.get(dateKey);
     
     if (purchases && purchases.length > 0) {
@@ -133,5 +123,3 @@ export function CalendarView({ items, currency, onDeleteByDateAndGroup }: Calend
     </>
   );
 }
-
-    
