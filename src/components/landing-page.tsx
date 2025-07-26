@@ -140,8 +140,8 @@ export function LandingPage() {
 
       {/* Footer */}
       <footer id="contact" className="border-t">
-        <div className="container py-8 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Don't Forget the Oranges!, Inc. All rights reserved.</p>
+        <div className="container py-8 flex flex-col md:flex-row items-center justify-center md:justify-between gap-4">
+          <p className="text-sm text-muted-foreground text-center md:text-left">&copy; {new Date().getFullYear()} Don't Forget the Oranges!, Inc. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground">Terms</Link>
             <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">Privacy</Link>
@@ -151,5 +151,3 @@ export function LandingPage() {
     </div>
   );
 }
-
-    
