@@ -76,7 +76,15 @@ export default function DashboardPage() {
     }
   }, [user, currentApp]);
 
-  if (authLoading || isLoading) {
+  if (authLoading || (!user && !authLoading)) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-muted/40">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+  
+  if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-muted/40">
         <Loader2 className="h-8 w-8 animate-spin" />
