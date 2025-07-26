@@ -47,6 +47,7 @@ import { CURRENCIES } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Logo } from "./logo";
 import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
+import { EventDetailDialog } from "./event-detail-dialog";
 
 
 interface CardTrackerDashboardProps {
@@ -64,6 +65,8 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
   const [isGiftDialogOpen, setIsGiftDialogOpen] = React.useState(false);
   const [editingEvent, setEditingEvent] = React.useState<ShoppingEvent | undefined>(undefined);
   const [editingGift, setEditingGift] = React.useState<GiftItem | undefined>(undefined);
+  const [selectedEvent, setSelectedEvent] = React.useState<ShoppingEvent | undefined>(undefined);
+
 
   const handleEventSave = async (eventData: Omit<ShoppingEvent, 'id'> & { id?: string }) => {
     if (!user) return;
@@ -202,6 +205,15 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
         events={events}
         currency={currency}
       />
+      {selectedEvent && (
+        <EventDetailDialog
+            isOpen={!!selectedEvent}
+            onClose={() => setSelectedEvent(undefined)}
+            event={selectedEvent}
+            gifts={gifts}
+            currency={currency}
+        />
+      )}
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <header className="sticky top-0 z-30 flex h-20 items-center border-b bg-background">
           <div className="container mx-auto flex h-full items-center gap-4 px-4 sm:px-6">
@@ -279,7 +291,7 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                     <ul className="space-y-4 pr-4">
                       {sortedEvents.map(event => (
                         <li key={event.id} className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
+                            <button className="flex items-center gap-4 text-left flex-1" onClick={() => setSelectedEvent(event)}>
                                <div className="text-2xl w-8 text-center">
                                   {event.emoji ? (
                                       <span>{event.emoji}</span>
@@ -294,8 +306,8 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                                     <Badge variant={getCategoryBadgeVariant(event.category)}>{event.category}</Badge>
                                   </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2">
+                            </button>
+                            <div className="flex items-center gap-2 pl-2">
                               <p className="font-semibold text-primary hidden sm:block">{formatDistanceToNow(event.displayDate, { addSuffix: true })}</p>
                                <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
