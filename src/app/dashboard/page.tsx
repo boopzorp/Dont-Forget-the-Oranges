@@ -67,6 +67,9 @@ export default function DashboardPage() {
           checkBothLoaded();
         });
         subscriptions.push(unsubscribeGifts);
+      } else {
+        // If no app is selected or an unknown app is selected, stop loading
+        setIsLoading(false);
       }
 
       // Cleanup function
