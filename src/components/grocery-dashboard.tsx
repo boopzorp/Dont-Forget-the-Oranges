@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { MoreHorizontal, PlusCircle, Upload, Loader2, LogOut, ChevronDown, X } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Upload, Loader2, LogOut, ChevronDown, X, Menu, ShoppingCart, Gift } from "lucide-react";
 import { format } from "date-fns";
 import {
   Card,
@@ -26,6 +26,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -44,12 +49,14 @@ import { ThemeToggleButton } from "./theme-toggle-button";
 import { Logo } from "./logo";
 import { useAuth } from "@/hooks/use-auth";
 import { addItem, updateItem, deleteItem } from "@/lib/firebase/firestore";
+import type { AppName } from "@/app/dashboard/page";
 
 interface GroceryDashboardProps {
   initialItems: GroceryItem[];
+  onAppChange: (appName: AppName) => void;
 }
 
-export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
+export function GroceryDashboard({ initialItems, onAppChange }: GroceryDashboardProps) {
   const { user, signOut } = useAuth();
   const [items, setItems] = React.useState<GroceryItem[]>(initialItems);
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = React.useState(false);
@@ -474,9 +481,29 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                   <span className="hidden md:inline">Add Item</span>
             </Button>
             <ThemeToggleButton />
-            <Button variant="ghost" size="icon" onClick={signOut}>
-              <LogOut className="h-4 w-4" />
-            </Button>
+             <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <Menu className="h-5 w-5" />
+                    </Button>
+                </SheetTrigger>
+                <SheetContent>
+                    <nav className="grid gap-4 text-lg font-medium mt-8">
+                        <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('groceries')}>
+                            <ShoppingCart className="h-5 w-5" />
+                            GrocerEase
+                        </Button>
+                        <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('gifts')}>
+                            <Gift className="h-5 w-5" />
+                            Don't Forget the Card!
+                        </Button>
+                         <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={signOut}>
+                            <LogOut className="h-5 w-5" />
+                            Log Out
+                        </Button>
+                    </nav>
+                </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>

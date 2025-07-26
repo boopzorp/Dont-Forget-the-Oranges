@@ -7,13 +7,22 @@ import { Loader2 } from 'lucide-react';
 
 import { useAuth } from '@/hooks/use-auth';
 import { GroceryDashboard } from '@/components/grocery-dashboard';
-import type { GroceryItem } from '@/lib/types';
-import { getItems } from '@/lib/firebase/firestore';
+import { CardTrackerDashboard } from '@/components/card-tracker-dashboard';
+import type { GroceryItem, ShoppingEvent, GiftItem } from '@/lib/types';
+import { getItems, getShoppingEvents, getGiftItems } from '@/lib/firebase/firestore';
+
+export type AppName = 'groceries' | 'gifts';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [items, setItems] = React.useState<GroceryItem[]>([]);
+  
+  const [currentApp, setCurrentApp] = React.useState<AppName>('groceries');
+  
+  const [groceryItems, setGroceryItems] = React.useState<GroceryItem[]>([]);
+  const [shoppingEvents, setShoppingEvents] = React.useState<ShoppingEvent[]>([]);
+  const [giftItems, setGiftItems] = React.useState<GiftItem[]>([]);
+
   const [initialLoad, setInitialLoad] = React.useState(true);
 
   React.useEffect(() => {
@@ -24,14 +33,34 @@ export default function DashboardPage() {
 
   React.useEffect(() => {
     if (user) {
-      const unsubscribe = getItems(user.uid, (newItems) => {
-        setItems(newItems);
-        setInitialLoad(false);
-      });
-      // Cleanup subscription on unmount
-      return () => unsubscribe();
+      setInitialLoad(true);
+      let unsubscribe: () => void = () => {};
+      let unsubscribe2: () => void = () => {};
+      let unsubscribe3: () => void = () => {};
+
+      if (currentApp === 'groceries') {
+        unsubscribe = getItems(user.uid, (newItems) => {
+          setGroceryItems(newItems);
+          setInitialLoad(false);
+        });
+      } else if (currentApp === 'gifts') {
+         unsubscribe2 = getShoppingEvents(user.uid, (newEvents) => {
+          setShoppingEvents(newEvents);
+        });
+         unsubscribe3 = getGiftItems(user.uid, (newGifts) => {
+          setGiftItems(newGifts);
+          setInitialLoad(false);
+        });
+      }
+
+      // Cleanup subscription on unmount or when app changes
+      return () => {
+        unsubscribe();
+        unsubscribe2();
+        unsubscribe3();
+      };
     }
-  }, [user]);
+  }, [user, currentApp]);
 
   if (loading || initialLoad) {
     return (
@@ -41,5 +70,13 @@ export default function DashboardPage() {
     );
   }
 
-  return <GroceryDashboard initialItems={items} />;
+  if (currentApp === 'groceries') {
+    return <GroceryDashboard initialItems={groceryItems} onAppChange={setCurrentApp} />;
+  }
+  
+  if (currentApp === 'gifts') {
+    return <CardTrackerDashboard events={shoppingEvents} gifts={giftItems} onAppChange={setCurrentApp} />;
+  }
+
+  return null;
 }

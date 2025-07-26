@@ -1,4 +1,5 @@
 
+
 export type Category = 'Pantry' | 'Produce' | 'Dairy' | 'Meat' | 'Bakery' | 'Frozen' | 'Cleaning' | 'Snacks' | 'Other';
 
 export type StockStatus = 'In Stock' | 'Need to Order' | "Don't Need" | "Out of Stock";
@@ -26,3 +27,21 @@ export type Currency = {
     code: string;
     symbol: string;
 }
+
+// "Don't Forget the Card!" Types
+export type ShoppingEvent = {
+    id: string;
+    name: string; // e.g., "Mom's Birthday"
+    date: Date;
+    notes?: string;
+};
+
+export type GiftItem = {
+    id: string;
+    name: string;
+    price: number;
+    purchaseDate: Date;
+    forEventId?: string; // Link to a ShoppingEvent
+    recipient: string;
+    notes?: string;
+};
