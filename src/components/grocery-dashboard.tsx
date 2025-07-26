@@ -31,6 +31,7 @@ import { CategoryDetailDialog } from "./category-detail-dialog";
 import { GroceryItemListing } from "./grocery-item-listing";
 import { ConfirmPurchaseDialog } from "./confirm-purchase-dialog";
 import { extractGroceriesFromImage, ExtractedGroceryItem } from "@/ai/flows/extract-groceries-flow";
+import { ThemeToggleButton } from "./theme-toggle-button";
 
 interface GroceryDashboardProps {
   initialItems: GroceryItem[];
@@ -124,10 +125,12 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     });
 
     const reader = new FileReader();
-
-    reader.onload = async () => {
+    reader.onload = async (e) => {
       try {
-        const photoDataUri = reader.result as string;
+        const photoDataUri = e.target?.result as string;
+        if (!photoDataUri) {
+          throw new Error("Could not read file");
+        }
         const extractedItems = await extractGroceriesFromImage({ photoDataUri });
         
         if (extractedItems.length > 0) {
@@ -140,7 +143,6 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
               description: "The AI could not find any grocery items in the image.",
             });
         }
-
       } catch (error) {
         console.error("Error processing image:", error);
         toast({
@@ -155,7 +157,6 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         }
       }
     };
-
     reader.onerror = (error) => {
       console.error("Error reading file:", error);
       toast({
@@ -165,7 +166,6 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
       });
       setIsProcessingImage(false);
     };
-    
     reader.readAsDataURL(file);
   };
   
@@ -246,7 +246,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-secondary/60">
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
       {selectedCategory && (
         <CategoryDetailDialog
           isOpen={!!selectedCategory}
@@ -306,6 +306,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 <PlusCircle className="h-4 w-4 md:mr-2" />
                 <span className="hidden md:inline">Add Item</span>
           </Button>
+          <ThemeToggleButton />
         </div>
       </header>
 
