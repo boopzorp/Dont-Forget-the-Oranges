@@ -47,6 +47,7 @@ interface GroceryDashboardProps {
 
 export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   const [items, setItems] = React.useState<GroceryItem[]>(initialItems);
+  const [isAddItemDialogOpen, setIsAddItemDialogOpen] = React.useState(false);
   const [editingItem, setEditingItem] = React.useState<GroceryItem | undefined>(undefined);
   const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null);
   const [selectedMonth, setSelectedMonth] = React.useState<Date>(new Date());
@@ -106,8 +107,14 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   
   const openEditDialog = (item: GroceryItem) => {
     setEditingItem(item);
-    document.getElementById('add-item-dialog-trigger')?.click();
+    setIsAddItemDialogOpen(true);
   }
+
+  const openNewItemDialog = () => {
+    setEditingItem(undefined);
+    setIsAddItemDialogOpen(true);
+  }
+
 
   const handleCategoryClick = (category: Category) => {
     setSelectedCategory(category);
@@ -200,8 +207,13 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 {CURRENCIES.map(c => <SelectItem key={c.code} value={c.code}>{c.code} ({c.symbol})</SelectItem>)}
               </SelectContent>
             </Select>
-          <AddItemDialog onConfirm={handleItemAction} itemToEdit={editingItem}>
-             <Button id="add-item-dialog-trigger" onClick={() => setEditingItem(undefined)}>
+          <AddItemDialog 
+            onConfirm={handleItemAction} 
+            itemToEdit={editingItem}
+            isOpen={isAddItemDialogOpen}
+            onOpenChange={setIsAddItemDialogOpen}
+          >
+             <Button onClick={openNewItemDialog}>
               <PlusCircle className="mr-2 h-4 w-4" /> Add Item
             </Button>
           </AddItemDialog>

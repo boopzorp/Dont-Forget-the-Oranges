@@ -60,10 +60,11 @@ interface AddItemDialogProps {
   children: React.ReactNode;
   onConfirm: (item: Omit<GroceryItem, 'id' | 'orderHistory'> & { id?: string }) => void;
   itemToEdit?: GroceryItem;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
 }
 
-export function AddItemDialog({ children, onConfirm, itemToEdit }: AddItemDialogProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
+export function AddItemDialog({ children, onConfirm, itemToEdit, isOpen, onOpenChange }: AddItemDialogProps) {
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -100,11 +101,11 @@ export function AddItemDialog({ children, onConfirm, itemToEdit }: AddItemDialog
       title: itemToEdit ? "Item Updated" : "Item Added",
       description: `${values.name} has been successfully ${itemToEdit ? 'updated' : 'added'}.`,
     });
-    setIsOpen(false);
+    onOpenChange(false);
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
