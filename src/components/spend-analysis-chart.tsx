@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -61,12 +62,15 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
     };
 
     const chartData = Object.entries(spendingByCategory)
-    .map(([name, total]) => ({
-      name,
-      emoji: getCategoryEmoji(name),
-      total,
-      fill: `hsl(var(--chart-${(Object.keys(CATEGORIES).findIndex(c => c === name) % 5) + 1}))`
-    }))
+    .map(([name, total]) => {
+      const categoryIndex = CATEGORIES.findIndex(c => c.name === name);
+      return {
+        name,
+        emoji: getCategoryEmoji(name),
+        total,
+        fill: `hsl(var(--chart-${(categoryIndex % 5) + 1}))`
+      }
+    })
     .sort((a,b) => b.total - a.total);
 
 
@@ -76,15 +80,16 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
       },
     } satisfies ChartConfig;
 
-    chartData.forEach((d, i) => {
+    chartData.forEach((d) => {
+        const categoryIndex = CATEGORIES.findIndex(c => c.name === d.name);
         chartConfig[d.name as keyof typeof chartConfig] = {
             label: d.name,
-            color: `hsl(var(--chart-${(i % 5) + 1}))`
+            color: `hsl(var(--chart-${(categoryIndex % 5) + 1}))`
         }
     });
 
     return { chartData, chartConfig, availableMonths };
-  }, [items, selectedMonth]);
+  }, [items, selectedMonth, currency]);
 
   const handleBarClick = (data: any) => {
     if (data && data.activePayload && data.activePayload.length > 0) {
