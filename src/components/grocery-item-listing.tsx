@@ -72,19 +72,19 @@ export function GroceryItemListing({
     <Accordion type="multiple" className="w-full space-y-2">
       {items.map((item) => (
         <AccordionItem value={item.id} key={item.id} className="border-b-0 rounded-lg bg-card overflow-hidden shadow-sm">
-          <div className="flex items-center px-4 py-2">
-            <AccordionTrigger className="flex-1 p-0 hover:no-underline">
+          <div className="flex items-center px-4">
+            <AccordionTrigger className="flex-1 p-0 py-2 hover:no-underline">
               <div className="flex items-center gap-4 flex-1">
                 <span className="text-2xl">{getCategoryEmoji(item.category)}</span>
-                <div className="flex-1">
-                  <p className="font-semibold">{item.name}</p>
+                <div className="flex-1 overflow-hidden">
+                  <p className="font-semibold truncate pr-2">{item.name}</p>
                   <p className="text-sm text-muted-foreground">
                     Qty: {item.quantity} &bull; {item.category}
                   </p>
                 </div>
               </div>
             </AccordionTrigger>
-            <div className="flex items-center gap-4 ml-4">
+            <div className="flex items-center gap-4 ml-auto pl-4">
               {isShoppingList ? (
                 <TooltipProvider>
                     <div className="flex items-center gap-2">
