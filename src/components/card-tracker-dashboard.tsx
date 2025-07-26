@@ -33,6 +33,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import type { ShoppingEvent, GiftItem, AppName, Currency } from "@/lib/types";
 import { ThemeToggleButton } from "./theme-toggle-button";
@@ -258,53 +259,55 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
               </CardHeader>
               <CardContent>
                 {sortedEvents.length > 0 ? (
-                  <ul className="space-y-4">
-                    {sortedEvents.slice(0, 5).map(event => (
-                      <li key={event.id} className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                             <div className="text-2xl w-8 text-center">
-                                {event.emoji ? (
-                                    <span>{event.emoji}</span>
-                                ) : (
-                                    <CalendarDays className="h-5 w-5 text-muted-foreground" />
-                                )}
+                  <ScrollArea className="h-72">
+                    <ul className="space-y-4 pr-4">
+                      {sortedEvents.map(event => (
+                        <li key={event.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                               <div className="text-2xl w-8 text-center">
+                                  {event.emoji ? (
+                                      <span>{event.emoji}</span>
+                                  ) : (
+                                      <CalendarDays className="h-5 w-5 text-muted-foreground" />
+                                  )}
+                              </div>
+                              <div>
+                                  <p className="font-semibold">{event.name}</p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm text-muted-foreground">{format(event.displayDate, "MMMM do, yyyy")}</p>
+                                    <Badge variant={getCategoryBadgeVariant(event.category)}>{event.category}</Badge>
+                                  </div>
+                              </div>
                             </div>
-                            <div>
-                                <p className="font-semibold">{event.name}</p>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm text-muted-foreground">{format(event.displayDate, "MMMM do, yyyy")}</p>
-                                  <Badge variant={getCategoryBadgeVariant(event.category)}>{event.category}</Badge>
-                                </div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-primary hidden sm:block">{formatDistanceToNow(event.displayDate, { addSuffix: true })}</p>
+                               <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                          <span className="sr-only">More actions</span>
+                                      </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => openEditEventDialog(event)}>
+                                          <Pencil className="mr-2 h-4 w-4" /> Edit
+                                      </DropdownMenuItem>
+                                      <ConfirmDeleteDialog
+                                          onConfirm={() => handleDeleteEvent(event.id)}
+                                          title="Delete Event?"
+                                          description={`Are you sure you want to delete the event "${event.name}"? This action cannot be undone.`}
+                                      >
+                                          <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-600 px-2 py-1.5 h-auto text-sm font-normal relative flex cursor-default select-none items-center rounded-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                                              <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                          </Button>
+                                      </ConfirmDeleteDialog>
+                                  </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-primary hidden sm:block">{formatDistanceToNow(event.displayDate, { addSuffix: true })}</p>
-                             <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                        <span className="sr-only">More actions</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => openEditEventDialog(event)}>
-                                        <Pencil className="mr-2 h-4 w-4" /> Edit
-                                    </DropdownMenuItem>
-                                    <ConfirmDeleteDialog
-                                        onConfirm={() => handleDeleteEvent(event.id)}
-                                        title="Delete Event?"
-                                        description={`Are you sure you want to delete the event "${event.name}"? This action cannot be undone.`}
-                                    >
-                                        <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-600 px-2 py-1.5 h-auto text-sm font-normal relative flex cursor-default select-none items-center rounded-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                        </Button>
-                                    </ConfirmDeleteDialog>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                      </li>
-                    ))}
-                  </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  </ScrollArea>
                 ) : (
                   <div className="text-center py-10 text-muted-foreground">
                     <p>No upcoming events.</p>
