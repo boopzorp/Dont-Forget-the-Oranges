@@ -539,7 +539,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                          <CalendarView items={items} />
+                          <CalendarView items={items} currency={currency} />
                       </CardContent>
                   </Card>
               </TabsContent>
@@ -549,5 +549,3 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     </div>
   );
 }
-
-    
