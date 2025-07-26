@@ -29,6 +29,7 @@ import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
 import { AddItemDialog } from "./add-item-dialog";
 import { CategoryDetailDialog } from "./category-detail-dialog";
 import { GroceryItemListing } from "./grocery-item-listing";
+import { ConfirmPurchaseDialog } from "./confirm-purchase-dialog";
 import { extractGroceriesFromImage, ExtractedGroceryItem } from "@/ai/flows/extract-groceries-flow";
 
 interface GroceryDashboardProps {
@@ -43,6 +44,9 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   const [selectedMonth, setSelectedMonth] = React.useState<Date>(new Date());
   const [currency, setCurrency] = React.useState<Currency>(CURRENCIES[1]); // Default to INR
   const [isProcessingImage, setIsProcessingImage] = React.useState(false);
+  const [extractedItemsPendingConfirmation, setExtractedItemsPendingConfirmation] = React.useState<ExtractedGroceryItem[]>([]);
+  const [isConfirmPurchaseDialogOpen, setIsConfirmPurchaseDialogOpen] = React.useState(false);
+
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -125,22 +129,18 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
       try {
         const photoDataUri = reader.result as string;
         const extractedItems = await extractGroceriesFromImage({ photoDataUri });
+        
+        if (extractedItems.length > 0) {
+            setExtractedItemsPendingConfirmation(extractedItems);
+            setIsConfirmPurchaseDialogOpen(true);
+        } else {
+            toast({
+              variant: "destructive",
+              title: "No items found",
+              description: "The AI could not find any grocery items in the image.",
+            });
+        }
 
-        const newItems: GroceryItem[] = extractedItems.map((item: ExtractedGroceryItem) => ({
-          id: new Date().toISOString() + Math.random(),
-          name: item.name,
-          category: item.category,
-          quantity: 1,
-          price: 0,
-          status: 'Need to Order',
-          orderHistory: [],
-        }));
-
-        setItems(prevItems => [...newItems, ...prevItems]);
-        toast({
-          title: "Success!",
-          description: `${newItems.length} items were extracted and added to your list.`,
-        });
       } catch (error) {
         console.error("Error processing image:", error);
         toast({
@@ -169,6 +169,27 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     reader.readAsDataURL(file);
   };
   
+  const handleConfirmPurchase = (purchaseDate: Date) => {
+    const newItems: GroceryItem[] = extractedItemsPendingConfirmation.map((item: ExtractedGroceryItem) => ({
+      id: new Date().toISOString() + Math.random(),
+      name: item.name,
+      category: item.category,
+      price: item.price ?? 0,
+      quantity: 1,
+      status: 'In Stock',
+      orderHistory: [{ date: purchaseDate, price: item.price ?? 0 }],
+    }));
+
+    setItems(prevItems => [...newItems, ...prevItems]);
+    toast({
+      title: "Success!",
+      description: `${newItems.length} items were added to your list as "In Stock".`,
+    });
+    setExtractedItemsPendingConfirmation([]);
+    setIsConfirmPurchaseDialogOpen(false);
+  };
+
+
   const shoppingList = items.filter((item) => item.status === "Need to Order");
   const shoppingListTotal = shoppingList.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -213,6 +234,12 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         {/* Empty child to use this as a controlled dialog */}
         <div/>
       </AddItemDialog>
+      <ConfirmPurchaseDialog
+        isOpen={isConfirmPurchaseDialogOpen}
+        onClose={() => setIsConfirmPurchaseDialogOpen(false)}
+        onConfirm={handleConfirmPurchase}
+        itemCount={extractedItemsPendingConfirmation.length}
+       />
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -221,7 +248,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         onChange={handleImageUpload} 
       />
 
-      <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <Leaf className="h-6 w-6 text-primary" />
           <span className="font-headline">GrocerEase</span>
@@ -324,4 +351,3 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     </div>
   );
 }
- 
