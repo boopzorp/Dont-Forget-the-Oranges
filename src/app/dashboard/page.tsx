@@ -81,12 +81,12 @@ export default function DashboardPage() {
   
   React.useEffect(() => {
     const favicon = document.getElementById('favicon') as HTMLLinkElement | null;
-    if (favicon) {
-      if (currentApp === 'groceries') {
-        favicon.href = '/logo.png';
-      } else if (currentApp === 'gifts') {
-        favicon.href = '/card-logo.png';
-      }
+    if (currentApp === 'groceries') {
+      if (favicon) favicon.href = '/logo.png';
+      document.title = "Don't Forget the Oranges!";
+    } else if (currentApp === 'gifts') {
+      if (favicon) favicon.href = '/card-logo.png';
+      document.title = "Don't Forget the Card!";
     }
   }, [currentApp]);
 
