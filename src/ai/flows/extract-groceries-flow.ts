@@ -47,6 +47,11 @@ const prompt = ai.definePrompt({
 Your task is to analyze the provided image, identify each distinct grocery item, its price, and classify it into one of the following categories: ${categoryNames.join(', ')}.
 
 - Identify each item on the list.
+- Extract a concise, clean name for the item. For example:
+  - "iD Homestyle Whole Wheat Paratha" should become "Whole Wheat Paratha".
+  - "Britannia 100% Whole Wheat Bread" should become "Whole Wheat Bread".
+  - For simple items like "Egg", "Tomato", "Paneer", "Green Chilli", use just that single word.
+  - For branded items like "Munch chocolate", "Kitkat", or "Cheetos", use the brand and product name.
 - Extract the price for each item if it's available.
 - Ignore any quantities or other notes. Focus only on the item name and price.
 - For each item, choose the most appropriate category from the provided list.

@@ -170,24 +170,55 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   };
   
   const handleConfirmPurchase = (purchaseDate: Date) => {
-    const newItems: GroceryItem[] = extractedItemsPendingConfirmation.map((item: ExtractedGroceryItem) => ({
-      id: new Date().toISOString() + Math.random(),
-      name: item.name,
-      category: item.category,
-      price: item.price ?? 0,
-      quantity: 1,
-      status: 'In Stock',
-      orderHistory: [{ date: purchaseDate, price: item.price ?? 0 }],
-    }));
+    let updatedItemsCount = 0;
+    let newItemsCount = 0;
 
-    setItems(prevItems => [...newItems, ...prevItems]);
+    const updatedItems = items.map(existingItem => {
+        const matchingExtractedItem = extractedItemsPendingConfirmation.find(
+            (extracted) => extracted.name.toLowerCase() === existingItem.name.toLowerCase()
+        );
+
+        if (matchingExtractedItem) {
+            updatedItemsCount++;
+            return {
+                ...existingItem,
+                status: 'In Stock' as StockStatus,
+                price: matchingExtractedItem.price ?? existingItem.price,
+                orderHistory: [
+                    ...existingItem.orderHistory,
+                    { date: purchaseDate, price: matchingExtractedItem.price ?? existingItem.price },
+                ],
+            };
+        }
+        return existingItem;
+    });
+
+    const newItems: GroceryItem[] = extractedItemsPendingConfirmation
+        .filter(extractedItem => 
+            !items.some(existingItem => existingItem.name.toLowerCase() === extractedItem.name.toLowerCase())
+        )
+        .map((item: ExtractedGroceryItem) => {
+            newItemsCount++;
+            return {
+                id: new Date().toISOString() + Math.random(),
+                name: item.name,
+                category: item.category,
+                price: item.price ?? 0,
+                quantity: 1,
+                status: 'In Stock',
+                orderHistory: [{ date: purchaseDate, price: item.price ?? 0 }],
+            };
+        });
+
+    setItems([...updatedItems, ...newItems]);
+
     toast({
-      title: "Success!",
-      description: `${newItems.length} items were added to your list as "In Stock".`,
+        title: "Success!",
+        description: `${newItemsCount} new items added and ${updatedItemsCount} existing items updated.`,
     });
     setExtractedItemsPendingConfirmation([]);
     setIsConfirmPurchaseDialogOpen(false);
-  };
+};
 
 
   const shoppingList = items.filter((item) => item.status === "Need to Order");
