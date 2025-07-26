@@ -230,6 +230,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         itemToEdit={editingItem}
         isOpen={isAddItemDialogOpen}
         onOpenChange={setIsAddItemDialogOpen}
+        currency={currency}
       >
         {/* Empty child to use this as a controlled dialog */}
         <div/>

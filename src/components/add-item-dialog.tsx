@@ -45,7 +45,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { CATEGORIES } from "@/lib/data";
-import type { GroceryItem, StockStatus } from "@/lib/types";
+import type { GroceryItem, StockStatus, Currency } from "@/lib/types";
 
 const formSchema = z.object({
   name: z.string().min(2, "Item name must be at least 2 characters."),
@@ -62,9 +62,10 @@ interface AddItemDialogProps {
   itemToEdit?: GroceryItem;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  currency: Currency;
 }
 
-export function AddItemDialog({ children, onConfirm, itemToEdit, isOpen, onOpenChange }: AddItemDialogProps) {
+export function AddItemDialog({ children, onConfirm, itemToEdit, isOpen, onOpenChange, currency }: AddItemDialogProps) {
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -148,7 +149,7 @@ export function AddItemDialog({ children, onConfirm, itemToEdit, isOpen, onOpenC
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price ($)</FormLabel>
+                    <FormLabel>Price ({currency.symbol})</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" {...field} />
                     </FormControl>
