@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { MoreHorizontal, PlusCircle, Upload, Loader2, LogOut, ChevronDown } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Upload, Loader2, LogOut, ChevronDown, X } from "lucide-react";
 import { format } from "date-fns";
 import {
   Card,
@@ -30,7 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { GroceryItem, Category, StockStatus, Currency } from "@/lib/types";
-import { CURRENCIES, getAvailableMonths } from "@/lib/data";
+import { CURRENCIES, getAvailableMonths, CATEGORIES } from "@/lib/data";
 import { formatCurrency, cn, toDateString } from "@/lib/utils";
 import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
 import { GroupSpendChart } from "@/components/group-spend-chart";
@@ -60,6 +60,10 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   const [isProcessingImage, setIsProcessingImage] = React.useState(false);
   const [extractedItemsPendingConfirmation, setExtractedItemsPendingConfirmation] = React.useState<ExtractedGroceryItem[]>([]);
   const [isConfirmPurchaseDialogOpen, setIsConfirmPurchaseDialogOpen] = React.useState(false);
+
+  const [allItemsCategoryFilter, setAllItemsCategoryFilter] = React.useState<string>('All');
+  const [allItemsStatusFilter, setAllItemsStatusFilter] = React.useState<string>('All');
+  const [shoppingListCategoryFilter, setShoppingListCategoryFilter] = React.useState<string>('All');
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -364,10 +368,27 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
 
 
   const shoppingList = items.filter((item) => item.status === "Need to Order");
-  const shoppingListTotal = shoppingList.reduce(
+
+  const filteredShoppingList = React.useMemo(() => {
+    return shoppingList.filter(item => {
+      const categoryMatch = shoppingListCategoryFilter === 'All' || item.category === shoppingListCategoryFilter;
+      return categoryMatch;
+    });
+  }, [shoppingList, shoppingListCategoryFilter]);
+
+
+  const shoppingListTotal = filteredShoppingList.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
+
+  const filteredItems = React.useMemo(() => {
+    return items.filter(item => {
+      const categoryMatch = allItemsCategoryFilter === 'All' || item.category === allItemsCategoryFilter;
+      const statusMatch = allItemsStatusFilter === 'All' || item.status === allItemsStatusFilter;
+      return categoryMatch && statusMatch;
+    });
+  }, [items, allItemsCategoryFilter, allItemsStatusFilter]);
   
   const openEditDialog = (item: GroceryItem) => {
     setEditingItem(item);
@@ -585,36 +606,46 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="shopping-list">
                   Shopping List
-                  <span className="hidden sm:inline-block ml-1">({shoppingList.length})</span>
+                  <span className="hidden sm:inline-block ml-1">({filteredShoppingList.length})</span>
                 </TabsTrigger>
                 <TabsTrigger value="all-items">
                   All Items
-                  <span className="hidden sm:inline-block ml-1">({items.length})</span>
+                  <span className="hidden sm:inline-block ml-1">({filteredItems.length})</span>
                 </TabsTrigger>
                 <TabsTrigger value="calendar-view">Calendar</TabsTrigger>
               </TabsList>
               <TabsContent value="shopping-list">
                 <Card className="mt-4">
-                    <CardHeader className="pt-4">
+                    <CardHeader className="flex flex-row items-center justify-between pt-4">
                         <CardTitle>Shopping List</CardTitle>
+                        <div className="flex items-center gap-2">
+                            <Select value={shoppingListCategoryFilter} onValueChange={setShoppingListCategoryFilter}>
+                                <SelectTrigger className="w-[150px] h-9">
+                                    <SelectValue placeholder="Filter by category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="All">All Categories</SelectItem>
+                                    {CATEGORIES.map(cat => <SelectItem key={cat.name} value={cat.name}>{cat.emoji} {cat.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                             {shoppingListCategoryFilter !== 'All' && (
+                                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShoppingListCategoryFilter('All')}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent>
-                      {shoppingList.length > 0 ? (
-                          <GroceryItemListing 
-                            items={shoppingList} 
-                            currency={currency}
-                            handleStatusChange={handleStatusChange}
-                            handleQuantityChange={handleQuantityChange}
-                            handleDeleteItem={(itemId) => handleDeleteItem(itemId, true)}
-                            openEditDialog={openEditDialog}
-                            isShoppingList={true}
-                          />
-                      ) : (
-                          <div className="text-center py-10 text-muted-foreground">
-                              <p>Your shopping list is empty!</p>
-                              <p className="text-sm">Items marked "Need to Order" will appear here.</p>
-                          </div>
-                      )}
+                      <GroceryItemListing 
+                        items={filteredShoppingList} 
+                        currency={currency}
+                        handleStatusChange={handleStatusChange}
+                        handleQuantityChange={handleQuantityChange}
+                        handleDeleteItem={(itemId) => handleDeleteItem(itemId, true)}
+                        openEditDialog={openEditDialog}
+                        isShoppingList={true}
+                        hasActiveFilter={shoppingListCategoryFilter !== 'All'}
+                      />
                     </CardContent>
                     <CardFooter className="justify-end gap-2 border-t pt-4">
                       <span className="text-lg font-semibold">Total:</span>
@@ -626,17 +657,46 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
               </TabsContent>
               <TabsContent value="all-items">
                   <Card className="mt-4">
-                      <CardHeader className="pt-4">
+                      <CardHeader className="flex flex-row items-center justify-between pt-4">
                         <CardTitle>All Items</CardTitle>
+                        <div className="flex items-center gap-2">
+                             <Select value={allItemsStatusFilter} onValueChange={setAllItemsStatusFilter}>
+                                <SelectTrigger className="w-[150px] h-9">
+                                    <SelectValue placeholder="Filter by status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="All">All Statuses</SelectItem>
+                                    <SelectItem value="In Stock">In Stock</SelectItem>
+                                    <SelectItem value="Need to Order">Need to Order</SelectItem>
+                                    <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                                    <SelectItem value="Don't Need">Don't Need</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Select value={allItemsCategoryFilter} onValueChange={setAllItemsCategoryFilter}>
+                                <SelectTrigger className="w-[150px] h-9">
+                                    <SelectValue placeholder="Filter by category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="All">All Categories</SelectItem>
+                                    {CATEGORIES.map(cat => <SelectItem key={cat.name} value={cat.name}>{cat.emoji} {cat.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            {(allItemsCategoryFilter !== 'All' || allItemsStatusFilter !== 'All') && (
+                                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setAllItemsCategoryFilter('All'); setAllItemsStatusFilter('All'); }}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
                       </CardHeader>
                       <CardContent>
                           <GroceryItemListing 
-                            items={items} 
+                            items={filteredItems} 
                             currency={currency}
                             handleStatusChange={handleStatusChange}
                             handleQuantityChange={handleQuantityChange}
                             handleDeleteItem={(itemId) => handleDeleteItem(itemId, false)}
                             openEditDialog={openEditDialog}
+                            hasActiveFilter={allItemsCategoryFilter !== 'All' || allItemsStatusFilter !== 'All'}
                           />
                       </CardContent>
                   </Card>
@@ -665,5 +725,3 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     </div>
   );
 }
-
-    

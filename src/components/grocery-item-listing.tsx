@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { MoreHorizontal, Trash2, CheckCircle2, Plus, Minus } from "lucide-react";
+import { MoreHorizontal, Trash2, CheckCircle2, Plus, Minus, FilterX } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -37,6 +37,7 @@ interface GroceryItemListingProps {
     handleDeleteItem: (itemId: string) => void;
     openEditDialog: (item: GroceryItem) => void;
     isShoppingList?: boolean;
+    hasActiveFilter?: boolean;
 }
 
 export function GroceryItemListing({ 
@@ -46,7 +47,8 @@ export function GroceryItemListing({
     handleQuantityChange,
     handleDeleteItem,
     openEditDialog,
-    isShoppingList = false
+    isShoppingList = false,
+    hasActiveFilter = false,
 }: GroceryItemListingProps) {
 
   const getCategoryEmoji = (category: string) => {
@@ -67,6 +69,16 @@ export function GroceryItemListing({
         return "bg-background";
     }
   };
+
+  if (items.length === 0) {
+    return (
+      <div className="text-center py-10 text-muted-foreground">
+        <FilterX className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+        <p className="font-semibold">{hasActiveFilter ? "No items match your filters." : "This list is empty."}</p>
+        <p className="text-sm">{hasActiveFilter ? "Try adjusting or clearing the filters." : "Add some items to get started!"}</p>
+      </div>
+    )
+  }
 
 
   return (
