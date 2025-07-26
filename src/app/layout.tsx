@@ -28,6 +28,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+       <head>
+        <link id="favicon" rel="icon" href="/logo.png" type="image/png" />
+      </head>
       <body className={`${inter.variable} ${nanumPenScript.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"

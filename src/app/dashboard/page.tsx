@@ -78,6 +78,18 @@ export default function DashboardPage() {
       };
     }
   }, [user, currentApp]);
+  
+  React.useEffect(() => {
+    const favicon = document.getElementById('favicon') as HTMLLinkElement | null;
+    if (favicon) {
+      if (currentApp === 'groceries') {
+        favicon.href = '/logo.png';
+      } else if (currentApp === 'gifts') {
+        favicon.href = '/card-logo.png';
+      }
+    }
+  }, [currentApp]);
+
 
   if (authLoading || (!user && !authLoading)) {
     return (
