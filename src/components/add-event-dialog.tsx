@@ -109,8 +109,8 @@ export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }:
         baseCategory: getBaseCategory(eventToEdit.category),
         customCategory: getCustomCategory(eventToEdit.category),
         date: eventToEdit.date,
-        notes: eventToEdit.notes,
-        emoji: eventToEdit.emoji,
+        notes: eventToEdit.notes || '',
+        emoji: eventToEdit.emoji || '',
       } : {
         name: "",
         baseCategory: "Birthday",
@@ -197,6 +197,22 @@ export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }:
                 />
             </div>
             
+             {selectedBaseCategory === "Other" && (
+                <FormField
+                    control={form.control}
+                    name="customCategory"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Custom Category Name</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., Housewarming" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
+            
             <FormField
               control={form.control}
               name="date"
@@ -235,22 +251,7 @@ export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }:
                 </FormItem>
               )}
             />
-            
-             {selectedBaseCategory === "Other" && (
-                <FormField
-                    control={form.control}
-                    name="customCategory"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Custom Category Name</FormLabel>
-                            <FormControl>
-                                <Input placeholder="e.g., Housewarming" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            )}
+
             {selectedBaseCategory === "Birthday" && (
                 <p className="text-xs text-muted-foreground -mt-2">
                     For birthdays, just select the upcoming date this year.
