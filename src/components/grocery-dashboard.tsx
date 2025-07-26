@@ -2,7 +2,12 @@
 
 import * as React from "react";
 import { Leaf, MoreHorizontal, PlusCircle } from "lucide-react";
-
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import {
   Card,
   CardContent,
@@ -29,9 +34,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import type { GroceryItem } from "@/lib/types";
+import type { GroceryItem, Order } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
 import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
+import { ItemPriceHistoryChart } from "@/components/item-price-history-chart";
 import { AddItemDialog } from "./add-item-dialog";
 
 interface GroceryDashboardProps {
@@ -43,13 +49,27 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   const [editingItem, setEditingItem] = React.useState<GroceryItem | undefined>(undefined);
   const { toast } = useToast();
 
-  const handleItemAction = (itemData: Omit<GroceryItem, 'id'> & { id?: string }) => {
+  const handleItemAction = (itemData: Omit<GroceryItem, 'id' | 'orderHistory'> & { id?: string }) => {
     if (itemData.id) {
       // Update
-      setItems(items.map((i) => (i.id === itemData.id ? { ...i, ...itemData } : i)));
+      setItems(items.map((i) => {
+        if (i.id === itemData.id) {
+          const updatedItem = { ...i, ...itemData };
+          // If price changed, add to history
+          if (i.price !== updatedItem.price || i.orderHistory.length === 0) {
+            updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price}]
+          }
+          return updatedItem;
+        }
+        return i;
+      }));
     } else {
       // Add
-      const newItem: GroceryItem = { ...itemData, id: new Date().toISOString() };
+      const newItem: GroceryItem = { 
+        ...itemData, 
+        id: new Date().toISOString(),
+        orderHistory: [{date: new Date(), price: itemData.price}]
+      };
       setItems([newItem, ...items]);
     }
   };
@@ -78,66 +98,69 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   
   const openEditDialog = (item: GroceryItem) => {
     setEditingItem(item);
-    // The dialog trigger is inside the AddItemDialog component, we need to trigger it from here.
-    // A simple way is to have the button that opens the dialog be visible here.
-    // So we'll find the button and click it programmatically.
     document.getElementById('add-item-dialog-trigger')?.click();
   }
 
   const ListTable = ({ listItems }: { listItems: GroceryItem[] }) => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[60%]">Item</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Price</TableHead>
-          <TableHead className="w-[50px]"></TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {listItems.map((item) => (
-          <TableRow key={item.id}>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">{getCategoryEmoji(item.category)}</span>
-                <div>
-                  <div className="font-medium">{item.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Qty: {item.quantity} &bull; {item.category}
-                  </div>
-                </div>
+     <Accordion type="multiple" className="w-full">
+      {listItems.map((item) => (
+        <AccordionItem value={item.id} key={item.id}>
+           <div className="flex items-center pr-4">
+             <AccordionTrigger className="flex-1">
+                <Table className="w-full">
+                  <TableBody>
+                    <TableRow className="border-none hover:bg-transparent">
+                      <TableCell className="w-[60%] p-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{getCategoryEmoji(item.category)}</span>
+                          <div>
+                            <div className="font-medium">{item.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              Qty: {item.quantity} &bull; {item.category}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <Badge variant={item.status === 'In Stock' ? 'secondary' : 'outline'}>
+                          {item.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right p-2">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </AccordionTrigger>
+              <div className="w-[50px]">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => openEditDialog(item)}>Edit</DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() => handleDeleteItem(item.id)}
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            </TableCell>
-            <TableCell>
-              <Badge variant={item.status === 'In Stock' ? 'secondary' : 'outline'}>
-                {item.status}
-              </Badge>
-            </TableCell>
-            <TableCell className="text-right">
-              ${(item.price * item.quantity).toFixed(2)}
-            </TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => openEditDialog(item)}>Edit</DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="text-red-600"
-                    onClick={() => handleDeleteItem(item.id)}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+           </div>
+          <AccordionContent>
+            <div className="p-4 bg-muted/50 rounded-md">
+                <h4 className="font-semibold mb-2 text-sm">Price History</h4>
+                <ItemPriceHistoryChart orderHistory={item.orderHistory} />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
   );
 
   return (
@@ -178,6 +201,9 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 </TabsList>
             </div>
             <TabsContent value="shopping-list">
+              <CardHeader className="pt-0">
+                  <CardTitle>Shopping List</CardTitle>
+              </CardHeader>
               <CardContent>
                 {shoppingList.length > 0 ? (
                     <ListTable listItems={shoppingList} />
@@ -196,6 +222,9 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
               </CardFooter>
             </TabsContent>
             <TabsContent value="all-items">
+                <CardHeader className="pt-0">
+                  <CardTitle>All Items</CardTitle>
+                </CardHeader>
                 <CardContent>
                     <ListTable listItems={items} />
                 </CardContent>

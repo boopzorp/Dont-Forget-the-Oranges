@@ -8,6 +8,8 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import type { GroceryItem } from "@/lib/types";
+import { CATEGORIES } from "@/lib/data";
+
 
 interface SpendAnalysisChartProps {
   items: GroceryItem[];
@@ -25,8 +27,13 @@ export function SpendAnalysisChart({ items }: SpendAnalysisChartProps) {
       }
     });
 
+    const getCategoryEmoji = (category: string) => {
+        return CATEGORIES.find((c) => c.name === category)?.emoji || '🛒';
+    };
+
     const chartData = Object.entries(spendingByCategory).map(([name, total]) => ({
       name,
+      emoji: getCategoryEmoji(name),
       total,
     }));
 
@@ -57,11 +64,11 @@ export function SpendAnalysisChart({ items }: SpendAnalysisChartProps) {
           margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
         >
           <XAxis
-            dataKey="name"
+            dataKey="emoji"
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
+            
           />
           <YAxis
             tickFormatter={(value) => `$${value}`}

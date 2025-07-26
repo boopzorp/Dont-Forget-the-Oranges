@@ -58,7 +58,7 @@ const formSchema = z.object({
 
 interface AddItemDialogProps {
   children: React.ReactNode;
-  onConfirm: (item: Omit<GroceryItem, 'id'> & { id?: string }) => void;
+  onConfirm: (item: Omit<GroceryItem, 'id' | 'orderHistory'> & { id?: string }) => void;
   itemToEdit?: GroceryItem;
 }
 
@@ -68,7 +68,10 @@ export function AddItemDialog({ children, onConfirm, itemToEdit }: AddItemDialog
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: itemToEdit || {
+    defaultValues: itemToEdit ? {
+      ...itemToEdit,
+      lastOrdered: itemToEdit.orderHistory.length > 0 ? itemToEdit.orderHistory[itemToEdit.orderHistory.length-1].date : undefined
+    } : {
       name: "",
       quantity: 1,
       price: 0,
@@ -78,7 +81,10 @@ export function AddItemDialog({ children, onConfirm, itemToEdit }: AddItemDialog
 
   React.useEffect(() => {
     if (isOpen) {
-      form.reset(itemToEdit || {
+      form.reset(itemToEdit ? {
+        ...itemToEdit,
+        lastOrdered: itemToEdit.orderHistory.length > 0 ? itemToEdit.orderHistory[itemToEdit.orderHistory.length-1].date : undefined
+      } : {
         name: "",
         quantity: 1,
         price: 0,
@@ -88,7 +94,8 @@ export function AddItemDialog({ children, onConfirm, itemToEdit }: AddItemDialog
   }, [isOpen, itemToEdit, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onConfirm({ ...values, id: itemToEdit?.id });
+    const { lastOrdered, ...rest } = values;
+    onConfirm({ ...rest, id: itemToEdit?.id });
     toast({
       title: itemToEdit ? "Item Updated" : "Item Added",
       description: `${values.name} has been successfully ${itemToEdit ? 'updated' : 'added'}.`,
@@ -203,7 +210,7 @@ export function AddItemDialog({ children, onConfirm, itemToEdit }: AddItemDialog
                 </FormItem>
               )}
             />
-            <FormField
+             <FormField
               control={form.control}
               name="lastOrdered"
               render={({ field }) => (

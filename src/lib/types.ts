@@ -2,12 +2,17 @@ export type Category = 'Pantry' | 'Produce' | 'Dairy' | 'Meat' | 'Bakery' | 'Fro
 
 export type StockStatus = 'In Stock' | 'Need to Order';
 
+export type Order = {
+  date: Date;
+  price: number;
+};
+
 export type GroceryItem = {
   id: string;
   name: string;
   category: Category;
   quantity: number;
-  lastOrdered?: Date;
+  orderHistory: Order[];
   status: StockStatus;
   price: number;
 };
