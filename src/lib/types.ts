@@ -17,4 +17,7 @@ export type GroceryItem = {
   price: number;
 };
 
-    
+export type Currency = {
+    code: string;
+    symbol: string;
+}

@@ -16,17 +16,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import type { GroceryItem, Category } from "@/lib/types";
+import type { GroceryItem, Category, Currency } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
+import { formatCurrency } from "@/lib/utils";
 
 interface SpendAnalysisChartProps {
   items: GroceryItem[];
   onCategoryClick: (category: Category) => void;
   selectedMonth: Date;
   onMonthChange: (date: Date) => void;
+  currency: Currency;
 }
 
-export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMonthChange }: SpendAnalysisChartProps) {
+export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMonthChange, currency }: SpendAnalysisChartProps) {
     const { chartData, chartConfig, availableMonths } = React.useMemo(() => {
     const spendingByCategory: { [key: string]: number } = {};
     const allMonths = new Set<string>();
@@ -37,9 +39,9 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
             allMonths.add(monthKey);
             if (getMonth(order.date) === getMonth(selectedMonth) && getYear(order.date) === getYear(selectedMonth)) {
                 if (spendingByCategory[item.category]) {
-                    spendingByCategory[item.category] += order.price;
+                    spendingByCategory[item.category] += order.price * item.quantity;
                 } else {
-                    spendingByCategory[item.category] = order.price;
+                    spendingByCategory[item.category] = order.price * item.quantity;
                 }
             }
         })
@@ -62,6 +64,7 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
       name,
       emoji: getCategoryEmoji(name),
       total,
+      fill: `hsl(var(--chart-${Object.keys(spendingByCategory).indexOf(name) + 1}))`
     }));
 
     const chartConfig = {
@@ -92,7 +95,7 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
 
   return (
     <div className="relative">
-      <div className="absolute top-0 right-0">
+      <div className="absolute -top-10 right-0">
          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
@@ -109,7 +112,7 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="h-[250px] w-full pt-10">
+      <div className="h-[250px] w-full">
         {chartData.length === 0 ? (
            <div className="flex h-full w-full items-center justify-center rounded-lg">
                 <p className="text-muted-foreground">No spending data for {format(selectedMonth, "MMMM yyyy")}.</p>
@@ -127,16 +130,31 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                
+                tick={{fontSize: 20}}
             />
             <YAxis
-                tickFormatter={(value) => `$${value}`}
+                tickFormatter={(value) => formatCurrency(value, currency, 0)}
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
             />
-            <Tooltip cursor={false} content={<ChartTooltipContent />} />
-            <Bar dataKey="total" fill="var(--color-total)" radius={4} className="cursor-pointer" />
+            <Tooltip 
+                cursor={false} 
+                content={<ChartTooltipContent 
+                    formatter={(value, name, props) => (
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg">{props.payload.emoji}</span>
+                            <div>
+                                <div>{props.payload.name}</div>
+                                <div className="font-bold">{formatCurrency(value as number, currency)}</div>
+                            </div>
+                        </div>
+                    )}
+                    hideLabel
+                    hideIndicator
+                />} 
+             />
+            <Bar dataKey="total" radius={8} className="cursor-pointer" />
             </BarChart>
         </ChartContainer>
         )}

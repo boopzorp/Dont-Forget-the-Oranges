@@ -9,14 +9,17 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import type { Order } from "@/lib/types"
+import type { Order, Currency } from "@/lib/types"
+import { formatCurrency } from "@/lib/utils"
 
 interface ItemPriceHistoryChartProps {
-  orderHistory: Order[]
+  orderHistory: Order[],
+  currency: Currency
 }
 
 export function ItemPriceHistoryChart({
   orderHistory,
+  currency
 }: ItemPriceHistoryChartProps) {
   const { chartData, chartConfig } = React.useMemo(() => {
     const data = orderHistory.map((order) => ({
@@ -60,7 +63,7 @@ export function ItemPriceHistoryChart({
             tickFormatter={(value) => value}
           />
           <YAxis
-            tickFormatter={(value) => `$${value}`}
+            tickFormatter={(value) => formatCurrency(value, currency, 0)}
             tickLine={false}
             axisLine={false}
             tickMargin={8}
@@ -68,7 +71,15 @@ export function ItemPriceHistoryChart({
           />
           <Tooltip
             cursor={false}
-            content={<ChartTooltipContent hideIndicator />}
+            content={<ChartTooltipContent 
+                formatter={(value, name, props) => (
+                    <div className="flex flex-col">
+                        <span>{props.payload.date}</span>
+                        <span className="font-bold">{formatCurrency(value as number, currency)}</span>
+                    </div>
+                )}
+                hideIndicator 
+              />}
           />
           <Line
             dataKey="price"

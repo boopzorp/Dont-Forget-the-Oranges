@@ -22,17 +22,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import type { GroceryItem, Category } from "@/lib/types";
+import type { GroceryItem, Category, Currency } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
+import { formatCurrency } from "@/lib/utils";
+
 
 interface CategoryDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
   category: Category;
   items: GroceryItem[];
+  currency: Currency;
 }
 
-export function CategoryDetailDialog({ isOpen, onClose, category, items }: CategoryDetailDialogProps) {
+export function CategoryDetailDialog({ isOpen, onClose, category, items, currency }: CategoryDetailDialogProps) {
   const getCategoryEmoji = (categoryName: string) => {
     return CATEGORIES.find((c) => c.name === categoryName)?.emoji || '🛒';
   };
@@ -84,7 +87,7 @@ export function CategoryDetailDialog({ isOpen, onClose, category, items }: Categ
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
-                    <TableCell>${item.price.toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrency(item.price, currency)}</TableCell>
                     <TableCell>
                       <div className={`flex items-center gap-1 ${trend.color}`}>
                         {trend.icon}
@@ -106,5 +109,3 @@ export function CategoryDetailDialog({ isOpen, onClose, category, items }: Categ
     </Dialog>
   );
 }
-
-    

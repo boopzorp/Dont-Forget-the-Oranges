@@ -1,4 +1,4 @@
-import type { GroceryItem, Category } from './types';
+import type { GroceryItem, Category, Currency } from './types';
 
 export const CATEGORIES: { name: Category; emoji: string }[] = [
   { name: 'Pantry', emoji: '🥫' },
@@ -9,6 +9,14 @@ export const CATEGORIES: { name: Category; emoji: string }[] = [
   { name: 'Frozen', emoji: '🧊' },
   { name: 'Other', emoji: '🛒' },
 ];
+
+export const CURRENCIES: Currency[] = [
+  { code: 'USD', symbol: '$' },
+  { code: 'INR', symbol: '₹' },
+  { code: 'EUR', symbol: '€' },
+  { code: 'GBP', symbol: '£' },
+  { code: 'JPY', symbol: '¥' },
+]
 
 export const DUMMY_GROCERIES: GroceryItem[] = [
   {
