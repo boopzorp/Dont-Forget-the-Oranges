@@ -23,11 +23,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { GroceryItem, StockStatus, Currency } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
 import { cn, formatCurrency } from "@/lib/utils";
-import { ItemPriceHistoryChart } from "@/components/item-price-history-chart";
+import { ItemDetailView } from "./item-detail-view";
 
 
 interface GroceryItemListingProps {
@@ -134,10 +133,7 @@ export function GroceryItemListing({
             </div>
           </div>
           <AccordionContent>
-            <div className="p-4 bg-muted/40">
-                <h4 className="font-semibold mb-2 text-sm">Price History</h4>
-                <ItemPriceHistoryChart orderHistory={item.orderHistory} currency={currency} />
-            </div>
+            <ItemDetailView item={item} currency={currency} />
           </AccordionContent>
         </AccordionItem>
       ))}

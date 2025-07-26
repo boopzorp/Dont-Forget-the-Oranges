@@ -5,6 +5,8 @@ export type StockStatus = 'In Stock' | 'Need to Order' | "Don't Need" | "Out of 
 export type Order = {
   date: Date;
   price: number;
+  group?: string;
+  quantity: number;
 };
 
 export type GroceryItem = {
@@ -14,7 +16,8 @@ export type GroceryItem = {
   quantity: number;
   orderHistory: Order[];
   status: StockStatus;
-  price: number;
+  price: number; // Represents the latest price
+  defaultGroup?: string;
 };
 
 export type Currency = {

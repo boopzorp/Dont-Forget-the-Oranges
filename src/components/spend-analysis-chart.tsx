@@ -39,9 +39,9 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
             allMonths.add(monthKey);
             if (getMonth(order.date) === getMonth(selectedMonth) && getYear(order.date) === getYear(selectedMonth)) {
                 if (spendingByCategory[item.category]) {
-                    spendingByCategory[item.category] += order.price * item.quantity;
+                    spendingByCategory[item.category] += order.price * order.quantity;
                 } else {
-                    spendingByCategory[item.category] = order.price * item.quantity;
+                    spendingByCategory[item.category] = order.price * order.quantity;
                 }
             }
         })
@@ -60,19 +60,28 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
         return CATEGORIES.find((c) => c.name === category)?.emoji || '🛒';
     };
 
-    const chartData = Object.entries(spendingByCategory).map(([name, total]) => ({
+    const chartData = Object.entries(spendingByCategory)
+    .map(([name, total]) => ({
       name,
       emoji: getCategoryEmoji(name),
       total,
-      fill: `hsl(var(--chart-${Object.keys(spendingByCategory).indexOf(name) + 1}))`
-    }));
+      fill: `hsl(var(--chart-${(Object.keys(CATEGORIES).findIndex(c => c === name) % 5) + 1}))`
+    }))
+    .sort((a,b) => b.total - a.total);
+
 
     const chartConfig = {
       total: {
         label: "Total Spent",
-        color: "hsl(var(--primary))",
       },
     } satisfies ChartConfig;
+
+    chartData.forEach((d, i) => {
+        chartConfig[d.name as keyof typeof chartConfig] = {
+            label: d.name,
+            color: `hsl(var(--chart-${(i % 5) + 1}))`
+        }
+    });
 
     return { chartData, chartConfig, availableMonths };
   }, [items, selectedMonth]);
@@ -122,7 +131,7 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
             <BarChart
             accessibilityLayer
             data={chartData}
-            margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+            margin={{ top: 5, right: 0, left: -10, bottom: 5 }}
             onClick={handleBarClick}
             >
             <XAxis
@@ -137,6 +146,7 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
+                width={80}
             />
             <Tooltip 
                 cursor={false} 
@@ -154,7 +164,11 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
                     hideIndicator
                 />} 
              />
-            <Bar dataKey="total" radius={8} className="cursor-pointer" />
+            <Bar dataKey="total" radius={8} className="cursor-pointer">
+                 {chartData.map((d) => (
+                    <Bar key={d.name} dataKey="total" fill={d.fill} />
+                ))}
+            </Bar>
             </BarChart>
         </ChartContainer>
         )}

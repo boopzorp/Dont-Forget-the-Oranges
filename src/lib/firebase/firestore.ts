@@ -15,7 +15,7 @@ import type { GroceryItem, Order } from '../types';
 const GROCERY_COLLECTION = 'groceries';
 
 // Firestore data converters
-const toFirestore = (item: Omit<GroceryItem, 'id'>) => {
+const toFirestore = (item: Omit<GroceryItem, 'id'> | GroceryItem) => {
   return {
     ...item,
     orderHistory: item.orderHistory.map(h => ({

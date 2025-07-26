@@ -22,9 +22,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { GroceryItem, Category, StockStatus, Currency } from "@/lib/types";
-import { CURRENCIES, CATEGORIES } from "@/lib/data";
+import { CURRENCIES } from "@/lib/data";
 import { formatCurrency, cn } from "@/lib/utils";
 import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
+import { GroupSpendChart } from "@/components/group-spend-chart";
+import { CalendarView } from "@/components/calendar-view";
 import { AddItemDialog } from "./add-item-dialog";
 import { CategoryDetailDialog } from "./category-detail-dialog";
 import { GroceryItemListing } from "./grocery-item-listing";
@@ -63,17 +65,31 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     if (itemData.id) {
       const existingItem = items.find(i => i.id === itemData.id);
       if (!existingItem) return;
-
+      
       const updatedItem: GroceryItem = { ...existingItem, ...itemData };
-      if (existingItem.price !== updatedItem.price || existingItem.orderHistory.length === 0) {
-        updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price}];
+      if (itemData.status === 'In Stock' && existingItem.status !== 'In Stock') {
+        updatedItem.orderHistory.push({
+          date: new Date(),
+          price: updatedItem.price,
+          group: updatedItem.defaultGroup || "Personal",
+          quantity: updatedItem.quantity
+        });
       }
       await updateItem(user.uid, updatedItem);
+
     } else {
       const newItem: Omit<GroceryItem, 'id'> = { 
         ...itemData, 
-        orderHistory: [{date: new Date(), price: itemData.price}]
+        orderHistory: []
       };
+      if (newItem.status === 'In Stock') {
+        newItem.orderHistory.push({
+            date: new Date(), 
+            price: itemData.price, 
+            group: itemData.defaultGroup || 'Personal',
+            quantity: itemData.quantity
+        });
+      }
       await addItem(user.uid, newItem);
     }
   };
@@ -104,8 +120,8 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     const itemToUpdate = items.find(i => i.id === itemId);
     if (itemToUpdate) {
         const updatedItem = { ...itemToUpdate, status };
-        if (status === 'In Stock' && itemToUpdate.status === 'Need to Order') {
-            updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price}];
+        if (status === 'In Stock' && itemToUpdate.status !== 'In Stock') {
+            updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: updatedItem.price, group: itemToUpdate.defaultGroup || 'Personal', quantity: itemToUpdate.quantity}];
             toast({
                 title: "Item Stocked",
                 description: `${itemToUpdate.name} marked as "In Stock" and purchase recorded.`,
@@ -170,15 +186,13 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     reader.readAsDataURL(file);
   };
   
-  const handleConfirmPurchase = async (purchaseDate: Date) => {
+  const handleConfirmPurchase = async (purchaseDate: Date, group: string) => {
     if (!user) return;
 
     const promises: Promise<any>[] = [];
 
     let updatedItemsCount = 0;
     let newItemsCount = 0;
-
-    const existingItemsToUpdate: GroceryItem[] = [];
     
     items.forEach(existingItem => {
         const matchingExtractedItem = extractedItemsPendingConfirmation.find(
@@ -193,7 +207,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 price: matchingExtractedItem.price ?? existingItem.price,
                 orderHistory: [
                     ...existingItem.orderHistory,
-                    { date: purchaseDate, price: matchingExtractedItem.price ?? existingItem.price },
+                    { date: purchaseDate, price: matchingExtractedItem.price ?? existingItem.price, group, quantity: 1 },
                 ],
             };
             promises.push(updateItem(user.uid, updated));
@@ -212,7 +226,8 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
               price: item.price ?? 0,
               quantity: 1,
               status: 'In Stock',
-              orderHistory: [{ date: purchaseDate, price: item.price ?? 0 }],
+              orderHistory: [{ date: purchaseDate, price: item.price ?? 0, group, quantity: 1 }],
+              defaultGroup: group,
           };
       });
 
@@ -289,13 +304,13 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         onChange={handleImageUpload} 
       />
 
-      <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <div className="flex items-center gap-2">
+      <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b bg-background px-4 sm:px-6">
+        <Link href="/" className="flex items-center gap-2">
             <Logo />
-            <div className="font-headline text-2xl hidden md:block">
+            <div className="font-headline text-xl hidden sm:block">
               Don't Forget the Oranges!
             </div>
-        </div>
+        </Link>
         <div className="ml-auto flex items-center gap-2 md:gap-4">
            <Select onValueChange={(value) => setCurrency(CURRENCIES.find(c => c.code === value) || CURRENCIES[0])} value={currency.code}>
               <SelectTrigger className="w-[100px] md:w-[120px]">
@@ -325,28 +340,46 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
       </header>
 
       <main className="flex flex-1 flex-col gap-4 p-2 md:p-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Spending Overview</CardTitle>
-            <CardDescription>
-              Your monthly grocery spending by category. Click a bar to see details.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SpendAnalysisChart 
-              items={items} 
-              onCategoryClick={handleCategoryClick} 
-              selectedMonth={selectedMonth}
-              onMonthChange={setSelectedMonth}
-              currency={currency}
-            />
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="lg:col-span-4">
+            <CardHeader>
+              <CardTitle>Spending Overview</CardTitle>
+              <CardDescription>
+                Your monthly grocery spending by category. Click a bar to see details.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pl-2">
+              <SpendAnalysisChart 
+                items={items} 
+                onCategoryClick={handleCategoryClick} 
+                selectedMonth={selectedMonth}
+                onMonthChange={setSelectedMonth}
+                currency={currency}
+              />
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-3">
+             <CardHeader>
+              <CardTitle>Spending by Group</CardTitle>
+              <CardDescription>
+                Your monthly grocery spending by custom group.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <GroupSpendChart 
+                items={items} 
+                selectedMonth={selectedMonth}
+                currency={currency}
+              />
+            </CardContent>
+          </Card>
+        </div>
 
         <Tabs defaultValue="shopping-list">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="shopping-list">Shopping List ({shoppingList.length})</TabsTrigger>
               <TabsTrigger value="all-items">All Items ({items.length})</TabsTrigger>
+              <TabsTrigger value="calendar-view">Calendar</TabsTrigger>
             </TabsList>
             <TabsContent value="shopping-list">
                <Card className="mt-4">
@@ -394,10 +427,21 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                     </CardContent>
                 </Card>
             </TabsContent>
+             <TabsContent value="calendar-view">
+                <Card className="mt-4">
+                    <CardHeader className="pt-4">
+                      <CardTitle>Purchase Calendar</CardTitle>
+                       <CardDescription>
+                        Days you went grocery shopping are highlighted.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <CalendarView items={items} />
+                    </CardContent>
+                </Card>
+            </TabsContent>
           </Tabs>
       </main>
     </div>
   );
 }
-
-    
