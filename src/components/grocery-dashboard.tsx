@@ -496,8 +496,8 @@ export function GroceryDashboard({ initialItems, onAppChange }: GroceryDashboard
                   </SheetHeader>
                   <nav className="grid gap-4 text-lg font-medium mt-8">
                       <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('groceries')}>
-                          <ShoppingCart className="h-5 w-5" />
-                          GrocerEase
+                          <Logo />
+                          Don't Forget the Oranges!
                       </Button>
                       <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('gifts')}>
                           <Gift className="h-5 w-5" />

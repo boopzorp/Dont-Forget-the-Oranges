@@ -31,6 +31,7 @@ import { AddGiftDialog } from "./add-gift-dialog";
 import { formatCurrency } from "@/lib/utils";
 import { CURRENCIES } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
+import { Logo } from "./logo";
 
 interface CardTrackerDashboardProps {
   events: ShoppingEvent[];
@@ -154,8 +155,8 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                   </SheetHeader>
                   <nav className="grid gap-4 text-lg font-medium mt-8">
                     <Button variant="ghost" className="justify-start gap-2" onClick={() => onAppChange('groceries')}>
-                      <ShoppingCart className="h-5 w-5" />
-                      GrocerEase
+                      <Logo />
+                      Don't Forget the Oranges!
                     </Button>
                     <Button variant="ghost" className="justify-start gap-2" onClick={() => onAppChange('gifts')}>
                       <Gift className="h-5 w-5" />
