@@ -84,7 +84,7 @@ export function GroceryItemListing({
                         </Tooltip>
                          <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button size="icon" variant="ghost" className="w-9 h-9 text-red-600 hover:text-red-700" onClick={() => handleStatusChange(item.id, 'In Stock')}>
+                                <Button size="icon" variant="ghost" className="w-9 h-9 text-red-600 hover:text-red-700" onClick={() => handleDeleteItem(item.id)}>
                                     <Trash2 className="h-5 w-5"/>
                                 </Button>
                             </TooltipTrigger>
@@ -100,8 +100,10 @@ export function GroceryItemListing({
                     <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                    <SelectItem value="In Stock">In Stock</SelectItem>
                     <SelectItem value="Need to Order">Need to Order</SelectItem>
+                    <SelectItem value="In Stock">In Stock</SelectItem>
+                    <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                    <SelectItem value="Don't Need">Don't Need</SelectItem>
                     </SelectContent>
                 </Select>
               )}

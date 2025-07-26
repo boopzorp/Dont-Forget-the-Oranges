@@ -42,7 +42,7 @@ export const DUMMY_GROCERIES: GroceryItem[] = [
         { date: new Date('2023-10-15'), price: 4.20 },
         { date: new Date('2023-10-22'), price: 4.25 },
     ],
-    status: 'Need to Order',
+    status: 'Out of Stock',
     price: 4.25,
   },
   {
@@ -84,7 +84,7 @@ export const DUMMY_GROCERIES: GroceryItem[] = [
         { date: new Date('2023-07-15'), price: 1.29 },
         { date: new Date('2023-09-15'), price: 1.29 },
     ],
-    status: 'In Stock',
+    status: 'Don\'t Need',
     price: 1.29,
   },
     {

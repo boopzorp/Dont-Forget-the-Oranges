@@ -45,14 +45,14 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { CATEGORIES } from "@/lib/data";
-import type { GroceryItem } from "@/lib/types";
+import type { GroceryItem, StockStatus } from "@/lib/types";
 
 const formSchema = z.object({
   name: z.string().min(2, "Item name must be at least 2 characters."),
   category: z.enum(["Pantry", "Produce", "Dairy", "Meat", "Bakery", "Frozen", "Other"]),
   quantity: z.coerce.number().min(1, "Quantity must be at least 1."),
   price: z.coerce.number().min(0, "Price cannot be negative."),
-  status: z.enum(["In Stock", "Need to Order"]),
+  status: z.enum(["In Stock", "Need to Order", "Out of Stock", "Don't Need"]),
   lastOrdered: z.date().optional(),
 });
 
@@ -191,7 +191,7 @@ export function AddItemDialog({ children, onConfirm, itemToEdit, isOpen, onOpenC
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="flex space-x-4"
+                      className="grid grid-cols-2 gap-x-4 gap-y-2"
                     >
                       <FormItem className="flex items-center space-x-2 space-y-0">
                         <FormControl>
@@ -204,6 +204,18 @@ export function AddItemDialog({ children, onConfirm, itemToEdit, isOpen, onOpenC
                           <RadioGroupItem value="In Stock" />
                         </FormControl>
                         <FormLabel className="font-normal">In Stock</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="Out of Stock" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Out of Stock</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="Don't Need" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Don't Need</FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>

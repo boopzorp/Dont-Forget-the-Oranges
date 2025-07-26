@@ -1,6 +1,6 @@
 export type Category = 'Pantry' | 'Produce' | 'Dairy' | 'Meat' | 'Bakery' | 'Frozen' | 'Other';
 
-export type StockStatus = 'In Stock' | 'Need to Order';
+export type StockStatus = 'In Stock' | 'Need to Order' | "Don't Need" | "Out of Stock";
 
 export type Order = {
   date: Date;
