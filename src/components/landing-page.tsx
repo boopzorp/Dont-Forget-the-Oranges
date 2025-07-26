@@ -62,7 +62,7 @@ export function LandingPage() {
             transition={{ duration: 0.7 }}
           >
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-4">
-              Grocery Lists, <span className="text-primary">Supercharged</span>.
+              Grocery Lists, <span className="text-primary italic font-bold">Supercharged</span>.
             </h1>
             <p className="max-w-xl mx-auto text-muted-foreground md:text-xl mb-8">
               Snap a photo of your handwritten list and let our AI do the rest. Don't Forget the Oranges intelligently organizes, prices, and tracks your shopping.
