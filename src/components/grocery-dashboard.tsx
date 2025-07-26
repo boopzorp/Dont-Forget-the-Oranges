@@ -1,10 +1,12 @@
 
+
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
 import { MoreHorizontal, PlusCircle, Upload, Loader2, LogOut, ChevronDown, X, Menu, ShoppingCart, Gift } from "lucide-react";
 import { format } from "date-fns";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -495,12 +497,12 @@ export function GroceryDashboard({ initialItems, onAppChange }: GroceryDashboard
                     <SheetTitle className="sr-only">Main Menu</SheetTitle>
                   </SheetHeader>
                   <nav className="grid gap-4 text-lg font-medium mt-8">
-                      <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('groceries')}>
+                      <Button variant="ghost" className="justify-start gap-2" onClick={() => onAppChange('groceries')}>
                           <Logo />
                           Don't Forget the Oranges!
                       </Button>
-                      <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={() => onAppChange('gifts')}>
-                          <Gift className="h-5 w-5" />
+                      <Button variant="ghost" className="justify-start gap-2" onClick={() => onAppChange('gifts')}>
+                          <Image src="/card-logo.png" alt="Card App Logo" width={32} height={32} className="h-8 w-8" />
                           Don't Forget the Card!
                       </Button>
                         <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={signOut}>

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import * as React from "react";
@@ -166,7 +167,7 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
                       Don't Forget the Oranges!
                     </Button>
                     <Button variant="ghost" className="justify-start gap-2" onClick={() => onAppChange('gifts')}>
-                      <Gift className="h-5 w-5" />
+                      <Image src="/card-logo.png" alt="Card App Logo" width={32} height={32} className="h-8 w-8" />
                       Don't Forget the Card!
                     </Button>
                     <Button variant="ghost" className="justify-start gap-2 text-muted-foreground" onClick={signOut}>
