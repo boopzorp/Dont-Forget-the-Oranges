@@ -50,6 +50,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   const [items, setItems] = React.useState<GroceryItem[]>(initialItems);
   const [editingItem, setEditingItem] = React.useState<GroceryItem | undefined>(undefined);
   const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null);
+  const [selectedMonth, setSelectedMonth] = React.useState<Date>(new Date());
   const { toast } = useToast();
 
   const handleItemAction = (itemData: Omit<GroceryItem, 'id' | 'orderHistory'> & { id?: string }) => {
@@ -207,7 +208,12 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <SpendAnalysisChart items={items} onCategoryClick={handleCategoryClick} />
+            <SpendAnalysisChart 
+              items={items} 
+              onCategoryClick={handleCategoryClick} 
+              selectedMonth={selectedMonth}
+              onMonthChange={setSelectedMonth}
+            />
           </CardContent>
         </Card>
 
@@ -254,5 +260,3 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     </div>
   );
 }
-
-    
