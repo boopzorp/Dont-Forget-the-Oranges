@@ -54,14 +54,15 @@ Your task is to analyze the provided image, identify each distinct grocery item,
   - "Heritage Cup Curd" should become "Curd".
   - "Daawat Basmati Rice" should become "Basmati Rice".
   - "Safal Frozen Mixed Vegetables" should become "Mixed Vegetables".
+  - "Mr. Makhana Lime & Chilli Flavoured Makhana" should become "Mr. Makhana Lime & Chilli".
   - For simple items like "Egg", "Tomato", "Paneer", "Green Chilli", use just that single word.
   - For uniquely branded items where the brand is the common name, like "Munch chocolate", "Kitkat", or "Cheetos", use the brand and product name.
 - Extract the quantity for each item. Look for multipliers like "x 2", "x 1", etc. The number after the 'x' is the quantity. If a quantity is not explicitly mentioned, assume it is 1.
-- Extract the price for each item if it's available.
+- Extract the price for each item if it's available. The price might have a currency symbol like ₹.
 - **VERY IMPORTANT**: If an item's quantity is greater than 1, the listed price is likely the total for all units. You MUST calculate the per-unit price by dividing the total price by the quantity. The 'price' field in your output must be the price for a single unit. For example, if "Aam Panna Mango Drink" is listed as "200 ml x 2" for "₹76", the quantity is 2 and the per-unit price is 38.
 - Ignore any other notes. Focus only on the item name, price, and quantity.
 - For each item, choose the most appropriate category from the provided list.
-- Items like "Chips", "Chocolates", "Beverages" should be categorized as 'Snacks'.
+- Items like "Chips", "Chocolates", "Beverages", "Makhana" should be categorized as 'Snacks'.
 - If an item doesn't fit well into any category, classify it as 'Other'.
 - Do not return items that are not groceries (e.g. "My Grocery List", "Weekly Shop", numbers, etc).
 
