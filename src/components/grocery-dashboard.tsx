@@ -429,8 +429,14 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
 
           <Tabs defaultValue="shopping-list">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="shopping-list">Shopping List ({shoppingList.length})</TabsTrigger>
-                <TabsTrigger value="all-items">All Items ({items.length})</TabsTrigger>
+                <TabsTrigger value="shopping-list">
+                  Shopping List
+                  <span className="hidden sm:inline-block ml-1">({shoppingList.length})</span>
+                </TabsTrigger>
+                <TabsTrigger value="all-items">
+                  All Items
+                  <span className="hidden sm:inline-block ml-1">({items.length})</span>
+                </TabsTrigger>
                 <TabsTrigger value="calendar-view">Calendar</TabsTrigger>
               </TabsList>
               <TabsContent value="shopping-list">
