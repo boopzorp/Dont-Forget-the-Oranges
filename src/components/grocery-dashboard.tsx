@@ -2,6 +2,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { MoreHorizontal, PlusCircle, Upload, Loader2, LogOut } from "lucide-react";
 import {
   Card,
