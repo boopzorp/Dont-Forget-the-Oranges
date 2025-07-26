@@ -19,7 +19,7 @@ const ExtractGroceriesInputSchema = z.object({
   photoDataUri: z
     .string()
     .describe(
-      "A photo of a grocery list, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "A photo of a grocery list, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'"
     ),
 });
 export type ExtractGroceriesInput = z.infer<typeof ExtractGroceriesInputSchema>;
@@ -47,11 +47,13 @@ const prompt = ai.definePrompt({
 Your task is to analyze the provided image, identify each distinct grocery item, its price, and classify it into one of the following categories: ${categoryNames.join(', ')}.
 
 - Identify each item on the list.
-- Extract a concise, clean name for the item. For example:
+- Extract a concise, clean name for the item. The goal is to remove brand names and descriptive words unless they are essential. For example:
   - "iD Homestyle Whole Wheat Paratha" should become "Whole Wheat Paratha".
   - "Britannia 100% Whole Wheat Bread" should become "Whole Wheat Bread".
+  - "Heritage Cup Curd" should become "Curd".
+  - "Daawat Basmati Rice" should become "Basmati Rice".
   - For simple items like "Egg", "Tomato", "Paneer", "Green Chilli", use just that single word.
-  - For branded items like "Munch chocolate", "Kitkat", or "Cheetos", use the brand and product name.
+  - For uniquely branded items like "Munch chocolate", "Kitkat", or "Cheetos", use the brand and product name.
 - Extract the price for each item if it's available.
 - Ignore any quantities or other notes. Focus only on the item name and price.
 - For each item, choose the most appropriate category from the provided list.
