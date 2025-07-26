@@ -141,8 +141,8 @@ export function LandingPage() {
         <div className="container py-8 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Don't Forget the Oranges, Inc. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">Terms</Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">Privacy</Link>
+            <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground">Terms</Link>
+            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">Privacy</Link>
           </div>
         </div>
       </footer>
