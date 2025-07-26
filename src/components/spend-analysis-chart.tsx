@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { format, getMonth, getYear, subMonths } from "date-fns";
+import { format, getMonth, getYear, subMonths, parse } from "date-fns";
 import { Bar, BarChart, XAxis, YAxis, Tooltip } from "recharts";
 import { ChevronDown } from "lucide-react";
 import {
@@ -54,7 +54,7 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
     }
 
     const availableMonths = Array.from(allMonths)
-        .map(monthStr => new Date(monthStr + '-02')) // Use day 02 to avoid timezone issues
+        .map(monthStr => parse(monthStr, 'yyyy-MM', new Date())) // Use parse for robust date creation
         .sort((a,b) => b.getTime() - a.getTime());
 
     const getCategoryEmoji = (category: string) => {
@@ -74,18 +74,19 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
     .sort((a,b) => b.total - a.total);
 
 
-    const chartConfig = {
+    const chartConfig: ChartConfig = {
       total: {
         label: "Total Spent",
       },
-    } satisfies ChartConfig;
+    };
 
     chartData.forEach((d) => {
-        const categoryIndex = CATEGORIES.findIndex(c => c.name === d.name);
-        chartConfig[d.name as keyof typeof chartConfig] = {
-            label: d.name,
-            color: `hsl(var(--chart-${(categoryIndex % 5) + 1}))`
-        }
+      const categoryIndex = CATEGORIES.findIndex(c => c.name === d.name);
+      const colorKey = `chart-${(categoryIndex % 5) + 1}`;
+      chartConfig[d.name as keyof typeof chartConfig] = {
+          label: d.name,
+          color: `hsl(var(--${colorKey}))`
+      }
     });
 
     return { chartData, chartConfig, availableMonths };
