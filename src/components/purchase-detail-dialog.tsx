@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -21,7 +20,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Order, Currency } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 
@@ -34,7 +39,32 @@ interface PurchaseDetailDialogProps {
 }
 
 export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency }: PurchaseDetailDialogProps) {
-  const totalSpend = orders.reduce((acc, order) => acc + (order.price * order.quantity), 0);
+  const [selectedGroup, setSelectedGroup] = React.useState<string>("All");
+
+  const uniqueGroups = React.useMemo(() => {
+    const groups = new Set<string>(['All']);
+    orders.forEach(order => {
+      if (order.group) {
+        groups.add(order.group);
+      }
+    });
+    return Array.from(groups);
+  }, [orders]);
+
+  const filteredOrders = React.useMemo(() => {
+    if (selectedGroup === "All") {
+      return orders;
+    }
+    return orders.filter(order => order.group === selectedGroup);
+  }, [orders, selectedGroup]);
+
+  const totalSpend = filteredOrders.reduce((acc, order) => acc + (order.price * order.quantity), 0);
+  
+  React.useEffect(() => {
+    if(isOpen) {
+      setSelectedGroup("All");
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -44,9 +74,27 @@ export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency }
             Purchases on {format(date, "MMMM d, yyyy")}
           </DialogTitle>
           <DialogDescription>
-            You purchased {orders.length} item(s) on this day.
+            You purchased {orders.length} item(s) on this day. Filter by group below.
           </DialogDescription>
         </DialogHeader>
+        
+        {uniqueGroups.length > 1 && (
+            <div className="my-2">
+                <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Filter by group..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {uniqueGroups.map(group => (
+                            <SelectItem key={group} value={group}>
+                                {group === "All" ? "All Groups" : group}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+        )}
+
         <div className="max-h-[50vh] overflow-y-auto my-4">
           <Table>
             <TableHeader>
@@ -58,7 +106,7 @@ export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency }
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map((order, index) => (
+              {filteredOrders.map((order, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">{order.name}</TableCell>
                   <TableCell>{order.quantity}</TableCell>
@@ -71,7 +119,7 @@ export function PurchaseDetailDialog({ isOpen, onClose, date, orders, currency }
         </div>
         <DialogFooter className="sm:justify-between border-t pt-4">
             <div className="flex items-baseline gap-2">
-                <p className="text-muted-foreground">Day's Total:</p>
+                <p className="text-muted-foreground">{selectedGroup === "All" ? "Day's Total:" : `Total for ${selectedGroup}:`}</p>
                 <p className="text-xl font-bold text-primary">{formatCurrency(totalSpend, currency)}</p>
             </div>
             <DialogClose asChild>
