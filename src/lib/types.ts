@@ -1,5 +1,6 @@
 
 
+
 export type Category = 'Pantry' | 'Produce' | 'Dairy' | 'Meat' | 'Bakery' | 'Frozen' | 'Cleaning' | 'Snacks' | 'Other';
 
 export type StockStatus = 'In Stock' | 'Need to Order' | "Don't Need" | "Out of Stock";
@@ -28,7 +29,7 @@ export type Currency = {
     symbol: string;
 }
 
-export type EventCategory = "Birthday" | "Anniversary" | "Other";
+export type EventCategory = string;
 
 // "Don't Forget the Card!" Types
 export type ShoppingEvent = {

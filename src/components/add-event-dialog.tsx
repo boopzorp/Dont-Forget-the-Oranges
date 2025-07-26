@@ -47,12 +47,22 @@ import type { ShoppingEvent } from "@/lib/types";
 
 const formSchema = z.object({
   name: z.string().min(2, "Event name must be at least 2 characters."),
-  category: z.enum(["Birthday", "Anniversary", "Other"]),
+  baseCategory: z.enum(["Birthday", "Anniversary", "Other"]),
+  customCategory: z.string().optional(),
   date: z.date({
     required_error: "A date is required.",
   }),
   notes: z.string().optional(),
+}).refine(data => {
+    if (data.baseCategory === "Other" && (!data.customCategory || data.customCategory.trim().length < 2)) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Custom category must be at least 2 characters.",
+    path: ["customCategory"],
 });
+
 
 interface AddEventDialogProps {
   children?: React.ReactNode;
@@ -63,22 +73,45 @@ interface AddEventDialogProps {
 }
 
 export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }: AddEventDialogProps) {
+  
+  const getBaseCategory = (category: string | undefined) => {
+    if (category === "Birthday" || category === "Anniversary") {
+      return category;
+    }
+    return category ? "Other" : "Birthday";
+  }
+  
+  const getCustomCategory = (category: string | undefined) => {
+     if (category && category !== "Birthday" && category !== "Anniversary") {
+      return category;
+    }
+    return "";
+  }
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: eventToEdit || {
+    defaultValues: {
       name: "",
-      category: "Birthday",
+      baseCategory: "Birthday",
+      customCategory: "",
       notes: "",
     },
   });
   
-  const selectedCategory = form.watch("category");
+  const selectedBaseCategory = form.watch("baseCategory");
 
   React.useEffect(() => {
     if (isOpen) {
-      form.reset(eventToEdit || {
+      form.reset(eventToEdit ? {
+        name: eventToEdit.name,
+        baseCategory: getBaseCategory(eventToEdit.category),
+        customCategory: getCustomCategory(eventToEdit.category),
+        date: eventToEdit.date,
+        notes: eventToEdit.notes,
+      } : {
         name: "",
-        category: "Birthday",
+        baseCategory: "Birthday",
+        customCategory: "",
         date: undefined,
         notes: "",
       });
@@ -86,7 +119,14 @@ export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }:
   }, [isOpen, eventToEdit, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onConfirm({ ...values, id: eventToEdit?.id });
+    const finalCategory = values.baseCategory === "Other" ? values.customCategory! : values.baseCategory;
+    const eventData = {
+        name: values.name,
+        category: finalCategory,
+        date: values.date,
+        notes: values.notes,
+    };
+    onConfirm({ ...eventData, id: eventToEdit?.id });
     onOpenChange(false);
   }
 
@@ -117,7 +157,7 @@ export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }:
             <div className="grid grid-cols-2 gap-4">
                <FormField
                   control={form.control}
-                  name="category"
+                  name="baseCategory"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category</FormLabel>
@@ -176,7 +216,22 @@ export function AddEventDialog({ onConfirm, eventToEdit, isOpen, onOpenChange }:
                   )}
                 />
             </div>
-            {selectedCategory === "Birthday" && (
+             {selectedBaseCategory === "Other" && (
+                <FormField
+                    control={form.control}
+                    name="customCategory"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Custom Category Name</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., Housewarming" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
+            {selectedBaseCategory === "Birthday" && (
                 <p className="text-xs text-muted-foreground -mt-2">
                     For birthdays, just select the upcoming date this year.
                 </p>
