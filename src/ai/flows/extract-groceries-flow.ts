@@ -52,8 +52,9 @@ Your task is to analyze the provided image, identify each distinct grocery item,
   - "Britannia 100% Whole Wheat Bread" should become "Whole Wheat Bread".
   - "Heritage Cup Curd" should become "Curd".
   - "Daawat Basmati Rice" should become "Basmati Rice".
+  - "Safal Frozen Mixed Vegetables" should become "Mixed Vegetables".
   - For simple items like "Egg", "Tomato", "Paneer", "Green Chilli", use just that single word.
-  - For uniquely branded items like "Munch chocolate", "Kitkat", or "Cheetos", use the brand and product name.
+  - For uniquely branded items where the brand is the common name, like "Munch chocolate", "Kitkat", or "Cheetos", use the brand and product name.
 - Extract the price for each item if it's available.
 - Ignore any quantities or other notes. Focus only on the item name and price.
 - For each item, choose the most appropriate category from the provided list.
