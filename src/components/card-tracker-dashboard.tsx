@@ -39,6 +39,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import type { ShoppingEvent, GiftItem, AppName, Currency } from "@/lib/types";
@@ -48,7 +49,9 @@ import { addShoppingEvent, updateShoppingEvent, deleteShoppingEvent, addGiftItem
 import { useToast } from "@/hooks/use-toast";
 import { AddEventDialog } from "./add-event-dialog";
 import { AddGiftDialog } from "./add-gift-dialog";
-import { formatCurrency } from "@/lib/utils";
+import { GiftCalendarView } from "./gift-calendar-view";
+import { DateDetailDialog } from "./date-detail-dialog";
+import { formatCurrency, toDateString } from "@/lib/utils";
 import { CURRENCIES } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Logo } from "./logo";
@@ -69,9 +72,11 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
 
   const [isEventDialogOpen, setIsEventDialogOpen] = React.useState(false);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = React.useState(false);
+  const [isDateDetailOpen, setIsDateDetailOpen] = React.useState(false);
   const [editingEvent, setEditingEvent] = React.useState<ShoppingEvent | undefined>(undefined);
   const [editingGift, setEditingGift] = React.useState<GiftItem | undefined>(undefined);
   const [selectedEvent, setSelectedEvent] = React.useState<ShoppingEvent | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
 
 
   const handleEventSave = async (eventData: Omit<ShoppingEvent, 'id'> & { id?: string }) => {
@@ -145,6 +150,11 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
     setEditingGift(gift);
     setIsGiftDialogOpen(true);
   };
+  
+  const openDateDetailDialog = (date: Date) => {
+    setSelectedDate(date);
+    setIsDateDetailOpen(true);
+  }
 
   const { upcomingEvents, pastEvents } = React.useMemo(() => {
     const today = new Date();
@@ -158,14 +168,10 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
       const isRecurring = event.category === "Birthday" || event.category === "Anniversary";
 
       if (isRecurring) {
+        const currentYear = getYear(today);
+        nextOccurrence.setFullYear(currentYear);
         if (nextOccurrence < today) {
-          nextOccurrence.setFullYear(getYear(today) + 1);
-        }
-        if (getYear(nextOccurrence) < getYear(today)) {
-          nextOccurrence.setFullYear(getYear(today));
-          if (nextOccurrence < today) {
-            nextOccurrence.setFullYear(getYear(today) + 1);
-          }
+            nextOccurrence.setFullYear(currentYear + 1);
         }
         upcoming.push({ ...event, displayDate: nextOccurrence });
       } else {
@@ -273,6 +279,16 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
             currency={currency}
         />
       )}
+      {selectedDate && (
+        <DateDetailDialog
+          isOpen={isDateDetailOpen}
+          onClose={() => setIsDateDetailOpen(false)}
+          date={selectedDate}
+          events={events}
+          gifts={gifts}
+          currency={currency}
+        />
+      )}
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <header className="sticky top-0 z-30 flex h-20 items-center border-b bg-background">
           <div className="container mx-auto flex h-full items-center gap-4 px-4 sm:px-6">
@@ -337,105 +353,131 @@ export function CardTrackerDashboard({ events, gifts, onAppChange }: CardTracker
         </header>
 
         <main className="flex-1">
-          <div className="container mx-auto grid gap-4 p-4 sm:p-6 md:grid-cols-2 lg:grid-cols-7">
-            
-            <Card className="lg:col-span-4">
-              <CardHeader>
-                <CardTitle>Upcoming Events</CardTitle>
-                <CardDescription>Don't forget these important dates!</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {upcomingEvents.length > 0 ? (
-                  <ScrollArea className="h-72">
-                    <ul className="space-y-4 pr-4">
-                      {upcomingEvents.map(event => (
-                        <EventListItem key={event.id} event={event} />
-                      ))}
-                    </ul>
-                  </ScrollArea>
-                ) : (
-                  <div className="text-center py-10 text-muted-foreground">
-                    <p>No upcoming events.</p>
-                    <p className="text-sm">Click "Add Event" to get started.</p>
-                  </div>
-                )}
-                 {pastEvents.length > 0 && (
-                    <Accordion type="single" collapsible className="w-full mt-4">
-                        <AccordionItem value="item-1">
-                            <AccordionTrigger>
-                                <div className="flex items-center gap-2">
-                                    <Archive className="h-4 w-4" />
-                                    Archived Events ({pastEvents.length})
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                                <ScrollArea className="h-60">
-                                    <ul className="space-y-4 pr-4">
-                                        {pastEvents.map(event => (
-                                            <EventListItem key={event.id} event={event} />
-                                        ))}
-                                    </ul>
-                                </ScrollArea>
-                            </AccordionContent>
-                        </AccordionItem>
-                    </Accordion>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-3">
-              <CardHeader>
-                <CardTitle>Recent Gifts</CardTitle>
-                <CardDescription>A log of your recent gift purchases.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {sortedGifts.length > 0 ? (
-                   <ul className="space-y-4">
-                    {sortedGifts.map(gift => (
-                      <li key={gift.id} className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <Users className="h-5 w-5 text-muted-foreground" />
-                            <div>
-                                <p className="font-semibold">{gift.name}</p>
-                                <p className="text-sm text-muted-foreground">For {gift.recipient}</p>
-                            </div>
+          <div className="container mx-auto p-4 sm:p-6">
+            <Tabs defaultValue="dashboard">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                  <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+                </TabsList>
+                <TabsContent value="dashboard">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
+                    <Card className="lg:col-span-4">
+                      <CardHeader>
+                        <CardTitle>Upcoming Events</CardTitle>
+                        <CardDescription>Don't forget these important dates!</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {upcomingEvents.length > 0 ? (
+                          <ScrollArea className="h-72">
+                            <ul className="space-y-4 pr-4">
+                              {upcomingEvents.map(event => (
+                                <EventListItem key={event.id} event={event} />
+                              ))}
+                            </ul>
+                          </ScrollArea>
+                        ) : (
+                          <div className="text-center py-10 text-muted-foreground">
+                            <p>No upcoming events.</p>
+                            <p className="text-sm">Click "Add Event" to get started.</p>
                           </div>
-                           <div className="flex items-center gap-2">
-                              <p className="font-semibold">{formatCurrency(gift.price, currency)}</p>
-                               <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                                          <MoreHorizontal className="h-4 w-4" />
-                                          <span className="sr-only">More actions</span>
-                                      </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                      <DropdownMenuItem onClick={() => openEditGiftDialog(gift)}>
-                                          <Pencil className="mr-2 h-4 w-4" /> Edit
-                                      </DropdownMenuItem>
-                                      <ConfirmDeleteDialog
-                                          onConfirm={() => handleDeleteGift(gift.id)}
-                                          title="Delete Gift?"
-                                          description={`Are you sure you want to delete the gift "${gift.name}" for ${gift.recipient}? This action cannot be undone.`}
-                                      >
-                                          <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-600 px-2 py-1.5 h-auto text-sm font-normal relative flex cursor-default select-none items-center rounded-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-                                              <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                          </Button>
-                                      </ConfirmDeleteDialog>
-                                  </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                   <div className="text-center py-10 text-muted-foreground">
-                    <p>No gifts tracked yet.</p>
-                    <p className="text-sm">Click "Add Gift" to log a purchase.</p>
+                        )}
+                        {pastEvents.length > 0 && (
+                            <Accordion type="single" collapsible className="w-full mt-4">
+                                <AccordionItem value="item-1">
+                                    <AccordionTrigger>
+                                        <div className="flex items-center gap-2">
+                                            <Archive className="h-4 w-4" />
+                                            Archived Events ({pastEvents.length})
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <ScrollArea className="h-60">
+                                            <ul className="space-y-4 pr-4">
+                                                {pastEvents.map(event => (
+                                                    <EventListItem key={event.id} event={event} />
+                                                ))}
+                                            </ul>
+                                        </ScrollArea>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="lg:col-span-3">
+                      <CardHeader>
+                        <CardTitle>Recent Gifts</CardTitle>
+                        <CardDescription>A log of your recent gift purchases.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {sortedGifts.length > 0 ? (
+                          <ul className="space-y-4">
+                            {sortedGifts.map(gift => (
+                              <li key={gift.id} className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4">
+                                    <Users className="h-5 w-5 text-muted-foreground" />
+                                    <div>
+                                        <p className="font-semibold">{gift.name}</p>
+                                        <p className="text-sm text-muted-foreground">For {gift.recipient}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                      <p className="font-semibold">{formatCurrency(gift.price, currency)}</p>
+                                      <DropdownMenu>
+                                          <DropdownMenuTrigger asChild>
+                                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                  <MoreHorizontal className="h-4 w-4" />
+                                                  <span className="sr-only">More actions</span>
+                                              </Button>
+                                          </DropdownMenuTrigger>
+                                          <DropdownMenuContent align="end">
+                                              <DropdownMenuItem onClick={() => openEditGiftDialog(gift)}>
+                                                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                                              </DropdownMenuItem>
+                                              <ConfirmDeleteDialog
+                                                  onConfirm={() => handleDeleteGift(gift.id)}
+                                                  title="Delete Gift?"
+                                                  description={`Are you sure you want to delete the gift "${gift.name}" for ${gift.recipient}? This action cannot be undone.`}
+                                              >
+                                                  <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-600 px-2 py-1.5 h-auto text-sm font-normal relative flex cursor-default select-none items-center rounded-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                                                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                  </Button>
+                                              </ConfirmDeleteDialog>
+                                          </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="text-center py-10 text-muted-foreground">
+                            <p>No gifts tracked yet.</p>
+                            <p className="text-sm">Click "Add Gift" to log a purchase.</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </TabsContent>
+                <TabsContent value="calendar">
+                   <Card className="mt-4">
+                      <CardHeader>
+                        <CardTitle>Calendar View</CardTitle>
+                        <CardDescription>
+                          Events and gift purchases at a glance.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                          <GiftCalendarView 
+                            events={events} 
+                            gifts={gifts} 
+                            onDateSelect={openDateDetailDialog}
+                          />
+                      </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>

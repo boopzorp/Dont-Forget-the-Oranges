@@ -1,3 +1,4 @@
+
 import {
   collection,
   addDoc,
@@ -39,7 +40,6 @@ const groceryFromFirestore = (snapshot: any): GroceryItem => {
 };
 
 const eventToFirestore = (event: Omit<ShoppingEvent, 'id'> | ShoppingEvent) => {
-  // This was the source of the bug. It needs to explicitly return all fields.
   return {
     name: event.name,
     date: Timestamp.fromDate(event.date),
@@ -66,7 +66,7 @@ const giftToFirestore = (gift: Omit<GiftItem, 'id'> | GiftItem) => ({
     recipient: gift.recipient,
     price: gift.price,
     purchaseDate: Timestamp.fromDate(gift.purchaseDate),
-    forEventId: gift.forEventId || '',
+    forEventId: gift.forEventId || null,
     notes: gift.notes || '',
 });
 
