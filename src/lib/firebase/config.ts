@@ -4,12 +4,12 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  projectId: "grocerease-i6os2",
-  appId: "1:463813304850:web:a7eea631f87866a79e6ecb",
-  storageBucket: "grocerease-i6os2.firebasestorage.app",
-  apiKey: "AIzaSyD2TPShn9TzdsWpvuFLLjj6PrtARH6GzoA",
-  authDomain: "grocerease-i6os2.firebaseapp.com",
-  messagingSenderId: "463813304850",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
 
 // Initialize Firebase
