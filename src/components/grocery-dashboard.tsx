@@ -3,7 +3,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { MoreHorizontal, PlusCircle, Upload, Loader2, LogOut } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Upload, Loader2, LogOut, ChevronDown } from "lucide-react";
+import { format } from "date-fns";
 import {
   Card,
   CardContent,
@@ -19,11 +20,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { GroceryItem, Category, StockStatus, Currency } from "@/lib/types";
-import { CURRENCIES } from "@/lib/data";
+import { CURRENCIES, getAvailableMonths } from "@/lib/data";
 import { formatCurrency, cn } from "@/lib/utils";
 import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
 import { GroupSpendChart } from "@/components/group-spend-chart";
@@ -270,6 +277,8 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   const closeCategoryDialog = () => {
     setSelectedCategory(null);
   };
+  
+  const availableMonths = React.useMemo(() => getAvailableMonths(items), [items]);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -348,17 +357,35 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
           <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-7">
             <Card className="lg:col-span-4">
               <CardHeader>
-                <CardTitle>Spending Overview</CardTitle>
-                <CardDescription>
-                  Your monthly grocery spending by category. Click a bar to see details.
-                </CardDescription>
+                 <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Spending Overview</CardTitle>
+                    <CardDescription>
+                      Your monthly grocery spending by category.
+                    </CardDescription>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline">
+                        {format(selectedMonth, "MMMM yyyy")}
+                        <ChevronDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {availableMonths.map((month) => (
+                        <DropdownMenuItem key={month.toISOString()} onSelect={() => setSelectedMonth(month)}>
+                          {format(month, "MMMM yyyy")}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </CardHeader>
               <CardContent className="pl-2">
                 <SpendAnalysisChart 
                   items={items} 
                   onCategoryClick={handleCategoryClick} 
                   selectedMonth={selectedMonth}
-                  onMonthChange={setSelectedMonth}
                   currency={currency}
                 />
               </CardContent>
@@ -390,17 +417,35 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
               <TabsContent value="overview">
                 <Card className="mt-4">
                   <CardHeader>
-                    <CardTitle>Spending Overview</CardTitle>
-                    <CardDescription>
-                      Monthly spending by category. Click a bar for details.
-                    </CardDescription>
+                     <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>Spending Overview</CardTitle>
+                        <CardDescription>
+                          Monthly spending by category.
+                        </CardDescription>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            {format(selectedMonth, "MMM yy")}
+                            <ChevronDown className="ml-1 h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {availableMonths.map((month) => (
+                            <DropdownMenuItem key={month.toISOString()} onSelect={() => setSelectedMonth(month)}>
+                              {format(month, "MMMM yyyy")}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </CardHeader>
                   <CardContent className="pl-2">
                     <SpendAnalysisChart 
                       items={items} 
                       onCategoryClick={handleCategoryClick} 
                       selectedMonth={selectedMonth}
-                      onMonthChange={setSelectedMonth}
                       currency={currency}
                     />
                   </CardContent>

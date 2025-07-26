@@ -1,5 +1,6 @@
 
 import type { GroceryItem, Category, Currency } from './types';
+import { format, subMonths, parse } from 'date-fns';
 
 export const CATEGORIES: { name: Category; emoji: string }[] = [
   { name: 'Pantry', emoji: '🥫' },
@@ -20,6 +21,28 @@ export const CURRENCIES: Currency[] = [
   { code: 'GBP', symbol: '£' },
   { code: 'JPY', symbol: '¥' },
 ]
+
+export function getAvailableMonths(items: GroceryItem[]): Date[] {
+    const allMonths = new Set<string>();
+
+    items.forEach((item) => {
+        item.orderHistory.forEach(order => {
+            const monthKey = format(order.date, 'yyyy-MM');
+            allMonths.add(monthKey);
+        })
+    });
+    
+    // Add last 12 months for dropdown
+    for(let i=0; i < 12; i++) {
+        allMonths.add(format(subMonths(new Date(), i), 'yyyy-MM'));
+    }
+
+    const availableMonths = Array.from(allMonths)
+        .map(monthStr => parse(monthStr, 'yyyy-MM', new Date())) // Use parse for robust date creation
+        .sort((a,b) => b.getTime() - a.getTime());
+    
+    return availableMonths;
+}
 
 export const DUMMY_GROCERIES: GroceryItem[] = [
   {

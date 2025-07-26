@@ -2,21 +2,13 @@
 "use client";
 
 import * as React from "react";
-import { format, getMonth, getYear, subMonths, parse } from "date-fns";
+import { format, getMonth, getYear } from "date-fns";
 import { Bar, BarChart, XAxis, YAxis, Tooltip } from "recharts";
-import { ChevronDown } from "lucide-react";
 import {
   ChartContainer,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import type { GroceryItem, Category, Currency } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
 import { formatCurrency } from "@/lib/utils";
@@ -25,38 +17,25 @@ interface SpendAnalysisChartProps {
   items: GroceryItem[];
   onCategoryClick: (category: Category) => void;
   selectedMonth: Date;
-  onMonthChange: (date: Date) => void;
   currency: Currency;
 }
 
-export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMonthChange, currency }: SpendAnalysisChartProps) {
-    const { chartData, chartConfig, availableMonths } = React.useMemo(() => {
+export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, currency }: SpendAnalysisChartProps) {
+    const { chartData, chartConfig } = React.useMemo(() => {
     const spendingByCategory: { [key: string]: number } = {};
-    const allMonths = new Set<string>();
-
+    
     items.forEach((item) => {
         item.orderHistory.forEach(order => {
-            const monthKey = format(order.date, 'yyyy-MM');
-            allMonths.add(monthKey);
             if (getMonth(order.date) === getMonth(selectedMonth) && getYear(order.date) === getYear(selectedMonth)) {
                 if (spendingByCategory[item.category]) {
-                    spendingByCategory[item.category] += order.price * order.quantity;
+                    spendingByCategory[item.category] += order.price * item.quantity;
                 } else {
-                    spendingByCategory[item.category] = order.price * order.quantity;
+                    spendingByCategory[item.category] = order.price * item.quantity;
                 }
             }
         })
     });
     
-    // Add last 12 months for dropdown
-    for(let i=0; i < 12; i++) {
-        allMonths.add(format(subMonths(new Date(), i), 'yyyy-MM'));
-    }
-
-    const availableMonths = Array.from(allMonths)
-        .map(monthStr => parse(monthStr, 'yyyy-MM', new Date())) // Use parse for robust date creation
-        .sort((a,b) => b.getTime() - a.getTime());
-
     const getCategoryEmoji = (category: string) => {
         return CATEGORIES.find((c) => c.name === category)?.emoji || '🛒';
     };
@@ -89,7 +68,7 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
       }
     });
 
-    return { chartData, chartConfig, availableMonths };
+    return { chartData, chartConfig };
   }, [items, selectedMonth, currency]);
 
   const handleBarClick = (data: any) => {
@@ -110,23 +89,6 @@ export function SpendAnalysisChart({ items, onCategoryClick, selectedMonth, onMo
 
   return (
     <div className="relative">
-      <div className="absolute -top-10 right-0">
-         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              {format(selectedMonth, "MMMM yyyy")}
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {availableMonths.map((month) => (
-              <DropdownMenuItem key={month.toISOString()} onSelect={() => onMonthChange(month)}>
-                {format(month, "MMMM yyyy")}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
       <div className="h-[250px] w-full">
         {chartData.length === 0 ? (
            <div className="flex h-full w-full items-center justify-center rounded-lg">
