@@ -34,11 +34,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import type { GroceryItem, Order } from "@/lib/types";
+import type { GroceryItem, Order, Category } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
 import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
 import { ItemPriceHistoryChart } from "@/components/item-price-history-chart";
 import { AddItemDialog } from "./add-item-dialog";
+import { CategoryDetailDialog } from "./category-detail-dialog";
+
 
 interface GroceryDashboardProps {
   initialItems: GroceryItem[];
@@ -47,6 +49,7 @@ interface GroceryDashboardProps {
 export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   const [items, setItems] = React.useState<GroceryItem[]>(initialItems);
   const [editingItem, setEditingItem] = React.useState<GroceryItem | undefined>(undefined);
+  const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null);
   const { toast } = useToast();
 
   const handleItemAction = (itemData: Omit<GroceryItem, 'id' | 'orderHistory'> & { id?: string }) => {
@@ -100,6 +103,14 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     setEditingItem(item);
     document.getElementById('add-item-dialog-trigger')?.click();
   }
+
+  const handleCategoryClick = (category: Category) => {
+    setSelectedCategory(category);
+  };
+  
+  const closeCategoryDialog = () => {
+    setSelectedCategory(null);
+  };
 
   const ListTable = ({ listItems }: { listItems: GroceryItem[] }) => (
      <Accordion type="multiple" className="w-full">
@@ -165,6 +176,14 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
 
   return (
     <div className="flex min-h-screen w-full flex-col">
+       {selectedCategory && (
+        <CategoryDetailDialog
+          isOpen={!!selectedCategory}
+          onClose={closeCategoryDialog}
+          category={selectedCategory}
+          items={items.filter(item => item.category === selectedCategory)}
+        />
+      )}
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <Leaf className="h-6 w-6 text-primary" />
@@ -184,11 +203,11 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
           <CardHeader>
             <CardTitle>Spending Overview</CardTitle>
             <CardDescription>
-              Your monthly grocery spending by category.
+              Your monthly grocery spending by category. Click a bar to see details.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <SpendAnalysisChart items={items} />
+            <SpendAnalysisChart items={items} onCategoryClick={handleCategoryClick} />
           </CardContent>
         </Card>
 
@@ -235,3 +254,5 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     </div>
   );
 }
+
+    
