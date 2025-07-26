@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { format, getMonth, getYear, parseISO } from 'date-fns';
+import { format, getMonth, getYear, parseISO, startOfDay } from 'date-fns';
 import { Calendar } from "@/components/ui/calendar";
 import type { GroceryItem, Currency, Order } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
@@ -11,6 +11,14 @@ import { PurchaseDetailDialog } from "./purchase-detail-dialog";
 interface CalendarViewProps {
   items: GroceryItem[];
   currency: Currency;
+}
+
+// Helper to get a YYYY-MM-DD string from a date, ignoring timezone.
+const toDateString = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 export function CalendarView({ items, currency }: CalendarViewProps) {
@@ -25,9 +33,8 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
 
     items.forEach(item => {
       item.orderHistory.forEach(order => {
-        // By using `toISOString()` and taking the date part, we get a stable `YYYY-MM-DD`
-        // string in UTC, which avoids all timezone issues.
-        const dateKey = order.date.toISOString().slice(0, 10);
+        // Use a timezone-agnostic date string as the key
+        const dateKey = toDateString(order.date);
         
         dates.add(dateKey);
 
@@ -41,8 +48,7 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
       });
     });
     
-    // To show markers on the calendar, we parse the UTC date string.
-    // Appending 'T00:00:00Z' ensures it's interpreted as a UTC date.
+    // To show markers, parse the string as a UTC date to prevent shifts
     const purchaseDateObjects = Array.from(dates).map(d => parseISO(`${d}T00:00:00Z`));
 
     return {
@@ -55,12 +61,8 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
     
-    // To match our UTC-based keys, we must format the selected local date
-    // into its UTC `YYYY-MM-DD` equivalent before doing a lookup.
-    // We can do this by calculating the timezone offset.
-    const timezoneOffset = date.getTimezoneOffset() * 60000;
-    const utcDate = new Date(date.getTime() - timezoneOffset);
-    const dateKey = utcDate.toISOString().slice(0, 10);
+    // Convert the selected local date into our timezone-agnostic string key
+    const dateKey = toDateString(date);
 
     const purchases = purchasesByDate.get(dateKey);
     
