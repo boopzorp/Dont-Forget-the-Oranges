@@ -1,5 +1,3 @@
-# Firebase Studio
+Don't Forget the Oranges!
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+A simple and AI powered Grocery list and management app.
