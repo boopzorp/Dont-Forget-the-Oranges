@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { format, getMonth, getYear, isSameDay, parseISO } from 'date-fns';
+import { format, getMonth, getYear, isSameDay, parseISO, startOfUTCDay } from 'date-fns';
 import { Calendar } from "@/components/ui/calendar";
 import type { GroceryItem, Currency, Order } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
@@ -36,14 +36,16 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
         byDate.set(dateKey, [...existingOrders, { ...order, name: item.name }]);
 
         // Calculate total spend for the currently viewed month
-        if (getMonth(order.date) === getMonth(month) && getYear(order.date) === getYear(month)) {
+        // We compare UTC months and years to be consistent
+        const orderDateInUTC = startOfUTCDay(order.date);
+        if (getMonth(orderDateInUTC) === getMonth(month) && getYear(orderDateInUTC) === getYear(month)) {
           spend += order.price * order.quantity;
         }
       });
     });
     
     // Create Date objects from the UTC date strings for the calendar
-    const purchaseDateObjects = Array.from(dates).map(d => parseISO(`${d}T00:00:00.000Z`));
+    const purchaseDateObjects = Array.from(dates).map(d => parseISO(d));
 
     return {
       purchaseDates: purchaseDateObjects,
@@ -55,12 +57,9 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
     
-    // Format the selected date (which is in local time) to a YYYY-MM-DD string key
-    // This avoids timezone shifting issues.
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const dateKey = `${year}-${month}-${day}`;
+    // To reliably match with our UTC-based keys, we format the selected date (which is local)
+    // into its UTC YYYY-MM-DD equivalent.
+    const dateKey = format(date, "yyyy-MM-dd");
 
     const purchases = purchasesByDate.get(dateKey);
     
