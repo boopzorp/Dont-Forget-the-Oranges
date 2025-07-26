@@ -1,0 +1,82 @@
+import type { GroceryItem, Category } from './types';
+
+export const CATEGORIES: { name: Category; emoji: string }[] = [
+  { name: 'Pantry', emoji: '🥫' },
+  { name: 'Produce', emoji: '🍎' },
+  { name: 'Dairy', emoji: '🥛' },
+  { name: 'Meat', emoji: '🥩' },
+  { name: 'Bakery', emoji: '🍞' },
+  { name: 'Frozen', emoji: '🧊' },
+  { name: 'Other', emoji: '🛒' },
+];
+
+export const DUMMY_GROCERIES: GroceryItem[] = [
+  {
+    id: '1',
+    name: 'Organic Milk',
+    category: 'Dairy',
+    quantity: 1,
+    lastOrdered: new Date('2023-10-20'),
+    status: 'In Stock',
+    price: 3.5,
+  },
+  {
+    id: '2',
+    name: 'Sourdough Bread',
+    category: 'Bakery',
+    quantity: 1,
+    lastOrdered: new Date('2023-10-22'),
+    status: 'Need to Order',
+    price: 4.25,
+  },
+  {
+    id: '3',
+    name: 'Avocados',
+    category: 'Produce',
+    quantity: 4,
+    status: 'Need to Order',
+    price: 1.5,
+  },
+  {
+    id: '4',
+    name: 'Free-range Eggs',
+    category: 'Dairy',
+    quantity: 12,
+    lastOrdered: new Date('2023-10-20'),
+    status: 'In Stock',
+    price: 5.0,
+  },
+  {
+    id: '5',
+    name: 'Chicken Breast',
+    category: 'Meat',
+    quantity: 2,
+    status: 'Need to Order',
+    price: 9.99,
+  },
+  {
+    id: '6',
+    name: 'Pasta',
+    category: 'Pantry',
+    quantity: 2,
+    lastOrdered: new Date('2023-09-15'),
+    status: 'In Stock',
+    price: 1.29,
+  },
+    {
+    id: '7',
+    name: 'Frozen Peas',
+    category: 'Frozen',
+    quantity: 1,
+    status: 'Need to Order',
+    price: 2.19,
+  },
+    {
+    id: '8',
+    name: 'Tomato Sauce',
+    category: 'Pantry',
+    quantity: 3,
+    status: 'Need to Order',
+    price: 2.5,
+  },
+];
