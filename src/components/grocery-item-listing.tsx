@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { MoreHorizontal, Trash2, CheckCircle2 } from "lucide-react";
+import { MoreHorizontal, Trash2, CheckCircle2, Plus, Minus } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -32,7 +32,8 @@ import { ItemDetailView } from "./item-detail-view";
 interface GroceryItemListingProps {
     items: GroceryItem[];
     currency: Currency;
-    handleStatusChange: (itemId: string, status: StockStatus) => void;
+    handleStatusChange: (itemId: string, status: StockStatus, quantity?: number) => void;
+    handleQuantityChange: (itemId: string, quantity: number) => void;
     handleDeleteItem: (itemId: string) => void;
     openEditDialog: (item: GroceryItem) => void;
     isShoppingList?: boolean;
@@ -42,6 +43,7 @@ export function GroceryItemListing({
     items, 
     currency,
     handleStatusChange,
+    handleQuantityChange,
     handleDeleteItem,
     openEditDialog,
     isShoppingList = false
@@ -87,14 +89,16 @@ export function GroceryItemListing({
             <div className="flex items-center justify-between gap-2 md:gap-4 mt-2 md:mt-0 md:ml-auto md:pl-4">
               <div className="flex-1 md:flex-none">
                 {isShoppingList ? (
-                    <div className="flex items-center gap-2">
-                      <Button size="sm" variant="outline" className="text-green-600 border-green-300 w-full justify-center" onClick={() => handleStatusChange(item.id, 'In Stock')}>
-                          <CheckCircle2 className="h-4 w-4 mr-2"/>
-                          Got it
+                    <div className="flex items-center gap-1">
+                      <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => handleQuantityChange(item.id, item.quantity - 1)}>
+                        <Minus className="h-4 w-4"/>
                       </Button>
-                       <Button size="sm" variant="ghost" className="text-red-600" onClick={() => handleDeleteItem(item.id)}>
-                          <Trash2 className="h-4 w-4 mr-2"/>
-                          Remove
+                      <span className="font-bold w-8 text-center">{item.quantity}</span>
+                       <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => handleQuantityChange(item.id, item.quantity + 1)}>
+                        <Plus className="h-4 w-4"/>
+                      </Button>
+                      <Button size="icon" variant="ghost" className="text-green-600 ml-2 h-8 w-8" onClick={() => handleStatusChange(item.id, 'In Stock', item.quantity)}>
+                          <CheckCircle2 className="h-5 w-5"/>
                       </Button>
                     </div>
                 ) : (
@@ -112,7 +116,7 @@ export function GroceryItemListing({
                 )}
               </div>
               <p className="font-bold w-[80px] text-right">
-                {formatCurrency(item.price, currency)}
+                {formatCurrency(item.price * item.quantity, currency)}
               </p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -122,11 +126,11 @@ export function GroceryItemListing({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => openEditDialog(item)}>Edit</DropdownMenuItem>
-                  <DropdownMenuItem
-                      className="text-red-600"
+                   <DropdownMenuItem
+                      className={cn(isShoppingList && "text-red-600")}
                       onClick={() => handleDeleteItem(item.id)}
                   >
-                      Delete
+                      {isShoppingList ? 'Remove' : 'Delete'}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

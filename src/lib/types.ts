@@ -1,3 +1,4 @@
+
 export type Category = 'Pantry' | 'Produce' | 'Dairy' | 'Meat' | 'Bakery' | 'Frozen' | 'Cleaning' | 'Snacks' | 'Other';
 
 export type StockStatus = 'In Stock' | 'Need to Order' | "Don't Need" | "Out of Stock";
@@ -7,6 +8,7 @@ export type Order = {
   price: number;
   group?: string;
   quantity: number;
+  name?: string; // Optional: Used for displaying in purchase detail dialog
 };
 
 export type GroceryItem = {

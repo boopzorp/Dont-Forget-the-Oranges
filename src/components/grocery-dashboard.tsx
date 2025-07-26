@@ -123,19 +123,44 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
     }
   };
 
-  const handleStatusChange = async (itemId: string, status: StockStatus) => {
+  const handleStatusChange = async (itemId: string, status: StockStatus, newQuantity?: number) => {
     if (!user) return;
     const itemToUpdate = items.find(i => i.id === itemId);
     if (itemToUpdate) {
         const updatedItem = { ...itemToUpdate, status };
+        
+        // When moving to shopping list, reset quantity to 1
+        if (status === 'Need to Order') {
+          updatedItem.quantity = 1;
+        }
+
         if (status === 'In Stock' && itemToUpdate.status !== 'In Stock') {
-            updatedItem.orderHistory = [...updatedItem.orderHistory, {date: new Date(), price: itemToUpdate.price, group: itemToUpdate.defaultGroup || 'Personal', quantity: itemToUpdate.quantity}];
+            updatedItem.orderHistory = [
+              ...updatedItem.orderHistory,
+              {
+                date: new Date(),
+                price: itemToUpdate.price,
+                group: itemToUpdate.defaultGroup || 'Personal',
+                quantity: newQuantity || itemToUpdate.quantity
+              }
+            ];
             toast({
                 title: "Item Stocked",
                 description: `${itemToUpdate.name} marked as "In Stock" and purchase recorded.`,
             });
         }
         await updateItem(user.uid, updatedItem);
+    }
+  };
+
+   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
+    if (!user) return;
+    if (newQuantity < 1) return; // Prevent quantity from going below 1
+
+    const itemToUpdate = items.find(i => i.id === itemId);
+    if (itemToUpdate) {
+      const updatedItem = { ...itemToUpdate, quantity: newQuantity };
+      await updateItem(user.uid, updatedItem);
     }
   };
 
@@ -496,6 +521,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                             items={shoppingList} 
                             currency={currency}
                             handleStatusChange={handleStatusChange}
+                            handleQuantityChange={handleQuantityChange}
                             handleDeleteItem={(itemId) => handleDeleteItem(itemId, true)}
                             openEditDialog={openEditDialog}
                             isShoppingList={true}
@@ -525,6 +551,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                             items={items} 
                             currency={currency}
                             handleStatusChange={handleStatusChange}
+                            handleQuantityChange={handleQuantityChange}
                             handleDeleteItem={(itemId) => handleDeleteItem(itemId, false)}
                             openEditDialog={openEditDialog}
                           />
