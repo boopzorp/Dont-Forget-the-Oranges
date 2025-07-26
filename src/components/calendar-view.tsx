@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { format, getMonth, getYear, isSameDay, parseISO, startOfDay } from 'date-fns';
+import { format, getMonth, getYear, parseISO } from 'date-fns';
 import { Calendar } from "@/components/ui/calendar";
 import type { GroceryItem, Currency, Order } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
@@ -25,13 +25,12 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
 
     items.forEach(item => {
       item.orderHistory.forEach(order => {
-        // Use toISOString and slice to get a stable YYYY-MM-DD key regardless of timezone
+        // By using `toISOString()` and taking the date part, we get a stable `YYYY-MM-DD`
+        // string in UTC, which avoids all timezone issues.
         const dateKey = order.date.toISOString().slice(0, 10);
         
-        // Add to set for highlighting
         dates.add(dateKey);
 
-        // Group purchases by date
         const existingOrders = byDate.get(dateKey) || [];
         byDate.set(dateKey, [...existingOrders, { ...order, name: item.name }]);
 
@@ -42,7 +41,8 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
       });
     });
     
-    // Create Date objects from the UTC date strings for the calendar
+    // To show markers on the calendar, we parse the UTC date string.
+    // Appending 'T00:00:00Z' ensures it's interpreted as a UTC date.
     const purchaseDateObjects = Array.from(dates).map(d => parseISO(`${d}T00:00:00Z`));
 
     return {
@@ -55,8 +55,9 @@ export function CalendarView({ items, currency }: CalendarViewProps) {
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
     
-    // To reliably match with our UTC-based keys, we format the selected date (which is local)
-    // into its UTC YYYY-MM-DD equivalent.
+    // To match our UTC-based keys, we must format the selected local date
+    // into its UTC `YYYY-MM-DD` equivalent before doing a lookup.
+    // We can do this by calculating the timezone offset.
     const timezoneOffset = date.getTimezoneOffset() * 60000;
     const utcDate = new Date(date.getTime() - timezoneOffset);
     const dateKey = utcDate.toISOString().slice(0, 10);
