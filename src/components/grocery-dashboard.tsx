@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { Leaf, MoreHorizontal, PlusCircle, Upload, Loader2 } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Upload, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -32,6 +32,7 @@ import { GroceryItemListing } from "./grocery-item-listing";
 import { ConfirmPurchaseDialog } from "./confirm-purchase-dialog";
 import { extractGroceriesFromImage, ExtractedGroceryItem } from "@/ai/flows/extract-groceries-flow";
 import { ThemeToggleButton } from "./theme-toggle-button";
+import { Logo } from "./logo";
 
 interface GroceryDashboardProps {
   initialItems: GroceryItem[];
@@ -282,7 +283,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
 
       <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background px-4 md:px-6">
         <h1 className="flex items-center gap-2 text-2xl font-bold">
-          <Leaf className="h-6 w-6 text-primary" />
+          <Logo />
           <span className="font-headline hidden md:inline">GrocerEase</span>
         </h1>
         <div className="ml-auto flex items-center gap-2 md:gap-4">
