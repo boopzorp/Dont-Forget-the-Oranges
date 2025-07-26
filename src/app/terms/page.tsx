@@ -33,7 +33,7 @@ export default function TermsOfServicePage() {
 
       <h2 className="text-2xl font-bold mt-8 mb-4">6. Limitation of Liability</h2>
       <p>
-        To the fullest extent permitted by law, Don't Forget the Oranges, Inc. shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, resulting from your use of the Service.
+        To the fullest extent permitted by law, Don't Forget the Oranges shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, resulting from your use of the Service.
       </p>
 
       <h2 className="text-2xl font-bold mt-8 mb-4">7. Changes to Terms</h2>

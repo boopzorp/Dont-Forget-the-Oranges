@@ -292,7 +292,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
       <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background px-4 md:px-6">
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <Logo />
-          <span className="font-headline hidden md:inline">Don't Forget the Oranges</span>
+          <span className="font-headline hidden md:inline">Don't Forget the Oranges!</span>
         </h1>
         <div className="ml-auto flex items-center gap-2 md:gap-4">
            <Select onValueChange={(value) => setCurrency(CURRENCIES.find(c => c.code === value) || CURRENCIES[0])} value={currency.code}>

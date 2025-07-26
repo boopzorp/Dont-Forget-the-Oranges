@@ -8,7 +8,7 @@ export default function PrivacyPolicyPage() {
 
       <h2 className="text-2xl font-bold mt-8 mb-4">1. Introduction</h2>
       <p>
-        Don't Forget the Oranges, Inc. ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share information about you when you use our Service.
+        Don't Forget the Oranges ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share information about you when you use our Service.
       </p>
 
       <h2 className="text-2xl font-bold mt-8 mb-4">2. Information We Collect</h2>
