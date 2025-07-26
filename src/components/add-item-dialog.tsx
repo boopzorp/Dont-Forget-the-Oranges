@@ -49,7 +49,7 @@ import type { GroceryItem, Currency } from "@/lib/types";
 
 const formSchema = z.object({
   name: z.string().min(2, "Item name must be at least 2 characters."),
-  category: z.enum(["Pantry", "Produce", "Dairy", "Meat", "Bakery", "Frozen", "Cleaning", "Other"]),
+  category: z.enum(["Pantry", "Produce", "Dairy", "Meat", "Bakery", "Frozen", "Cleaning", "Snacks", "Other"]),
   quantity: z.coerce.number().min(1, "Quantity must be at least 1."),
   price: z.coerce.number().min(0, "Price cannot be negative."),
   status: z.enum(["In Stock", "Need to Order", "Out of Stock", "Don't Need"]),

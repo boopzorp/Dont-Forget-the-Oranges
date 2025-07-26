@@ -58,8 +58,8 @@ Your task is to analyze the provided image, identify each distinct grocery item,
 - Extract the price for each item if it's available.
 - Ignore any quantities or other notes. Focus only on the item name and price.
 - For each item, choose the most appropriate category from the provided list.
+- Items like "Chips", "Chocolates", "Beverages" should be categorized as 'Snacks'.
 - If an item doesn't fit well into any category, classify it as 'Other'.
-- Return the data as a JSON array of objects, where each object has a "name", "category", and "price" key, according to the output schema.
 - Do not return items that are not groceries (e.g. "My Grocery List", "Weekly Shop", numbers, etc).
 
 Image to process: {{media url=photoDataUri}}`,
