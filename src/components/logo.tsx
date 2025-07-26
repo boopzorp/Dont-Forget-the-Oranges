@@ -15,7 +15,7 @@ export function Logo() {
   return (
     <Image 
       src="/logo.png"
-      alt="GrocerEase Logo"
+      alt="Don't Forget the Oranges Logo"
       width={32}
       height={32}
       className="h-8 w-8"

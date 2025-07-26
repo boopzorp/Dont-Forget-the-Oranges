@@ -33,7 +33,7 @@ export function LandingPage() {
         <div className="container flex h-16 items-center">
           <Link href="/" className="flex items-center gap-2 mr-auto">
             <Logo />
-            <span className="font-bold hidden sm:inline-block">GrocerEase</span>
+            <span className="font-bold hidden sm:inline-block">Don't Forget the Oranges</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <Link href="#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</Link>
@@ -65,7 +65,7 @@ export function LandingPage() {
               Grocery Lists, <span className="text-primary">Supercharged</span>.
             </h1>
             <p className="max-w-xl mx-auto text-muted-foreground md:text-xl mb-8">
-              Snap a photo of your handwritten list and let our AI do the rest. GrocerEase intelligently organizes, prices, and tracks your shopping.
+              Snap a photo of your handwritten list and let our AI do the rest. Don't Forget the Oranges intelligently organizes, prices, and tracks your shopping.
             </p>
             <Button size="lg" asChild>
               <Link href="/dashboard">Get Started for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
@@ -79,7 +79,7 @@ export function LandingPage() {
           >
             <Image 
               src="https://placehold.co/1200x600.png"
-              alt="GrocerEase App Screenshot"
+              alt="App Screenshot"
               width={1200}
               height={600}
               data-ai-hint="app dashboard"
@@ -93,7 +93,7 @@ export function LandingPage() {
           <div className="container">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <h2 className="text-3xl md:text-4xl font-bold">Shopping, but way smarter.</h2>
-              <p className="text-muted-foreground mt-4">Here's how GrocerEase transforms your grocery routine from a chore into a breeze.</p>
+              <p className="text-muted-foreground mt-4">Here's how Don't Forget the Oranges transforms your grocery routine from a chore into a breeze.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               <FeatureCard 
@@ -139,7 +139,7 @@ export function LandingPage() {
       {/* Footer */}
       <footer id="contact" className="border-t">
         <div className="container py-8 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} GrocerEase, Inc. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Don't Forget the Oranges, Inc. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">Terms</Link>
             <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">Privacy</Link>
