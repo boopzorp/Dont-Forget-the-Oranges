@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { Leaf, MoreHorizontal, PlusCircle } from "lucide-react";
+import { Leaf, MoreHorizontal, PlusCircle, Upload, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -23,12 +23,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { GroceryItem, Category, StockStatus, Currency } from "@/lib/types";
-import { CURRENCIES } from "@/lib/data";
+import { CURRENCIES, CATEGORIES } from "@/lib/data";
 import { formatCurrency } from "@/lib/utils";
 import { SpendAnalysisChart } from "@/components/spend-analysis-chart";
 import { AddItemDialog } from "./add-item-dialog";
 import { CategoryDetailDialog } from "./category-detail-dialog";
 import { GroceryItemListing } from "./grocery-item-listing";
+import { extractGroceriesFromImage, ExtractedGroceryItem } from "@/ai/flows/extract-groceries-flow";
 
 interface GroceryDashboardProps {
   initialItems: GroceryItem[];
@@ -41,6 +42,8 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
   const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null);
   const [selectedMonth, setSelectedMonth] = React.useState<Date>(new Date());
   const [currency, setCurrency] = React.useState<Currency>(CURRENCIES[1]); // Default to INR
+  const [isProcessingImage, setIsProcessingImage] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleItemAction = (itemData: Omit<GroceryItem, 'id' | 'orderHistory'> & { id?: string }) => {
@@ -105,6 +108,64 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         return i;
     }));
   };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessingImage(true);
+    toast({
+      title: "Processing Image...",
+      description: "The AI is analyzing your grocery list.",
+    });
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      try {
+        const photoDataUri = reader.result as string;
+        const extractedItems = await extractGroceriesFromImage({ photoDataUri });
+
+        const newItems: GroceryItem[] = extractedItems.map((item: ExtractedGroceryItem) => ({
+          id: new Date().toISOString() + Math.random(),
+          name: item.name,
+          category: item.category,
+          quantity: 1, // Default quantity
+          price: 0, // Default price
+          status: 'Need to Order',
+          orderHistory: [],
+        }));
+
+        setItems(prevItems => [...newItems, ...prevItems]);
+        toast({
+          title: "Success!",
+          description: `${newItems.length} items were extracted and added to your list.`,
+        });
+      } catch (error) {
+        console.error("Error processing image:", error);
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "There was a problem processing your image. Please try again.",
+        });
+      } finally {
+        setIsProcessingImage(false);
+        // Reset file input
+        if(fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+      }
+    };
+    reader.onerror = (error) => {
+        console.error("Error reading file:", error);
+        toast({
+          variant: "destructive",
+          title: "File Read Error",
+          description: "Could not read the selected file.",
+        });
+        setIsProcessingImage(false);
+    };
+  };
   
   const shoppingList = items.filter((item) => item.status === "Need to Order");
   const shoppingListTotal = shoppingList.reduce(
@@ -151,6 +212,13 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
         {/* Empty child to use this as a controlled dialog */}
         <div/>
       </AddItemDialog>
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        className="hidden" 
+        accept="image/*" 
+        onChange={handleImageUpload} 
+      />
 
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <h1 className="flex items-center gap-2 text-2xl font-bold">
@@ -166,6 +234,14 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 {CURRENCIES.map(c => <SelectItem key={c.code} value={c.code}>{c.code} ({c.symbol})</SelectItem>)}
               </SelectContent>
             </Select>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isProcessingImage}>
+                {isProcessingImage ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Upload className="mr-2 h-4 w-4" />
+                )}
+                Upload List
+            </Button>
             <Button onClick={openNewItemDialog}>
             <PlusCircle className="mr-2 h-4 w-4" /> Add Item
           </Button>
@@ -230,7 +306,7 @@ export function GroceryDashboard({ initialItems }: GroceryDashboardProps) {
                 <Card className="mt-4">
                     <CardHeader className="pt-4">
                       <CardTitle>All Items</CardTitle>
-                    </CardHeader>
+                    </Header>
                     <CardContent>
                         <GroceryItemListing 
                            items={items} 

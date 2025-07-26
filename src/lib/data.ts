@@ -1,3 +1,4 @@
+
 import type { GroceryItem, Category, Currency } from './types';
 
 export const CATEGORIES: { name: Category; emoji: string }[] = [
@@ -84,7 +85,7 @@ export const DUMMY_GROCERIES: GroceryItem[] = [
         { date: new Date('2023-07-15'), price: 1.29 },
         { date: new Date('2023-09-15'), price: 1.29 },
     ],
-    status: 'Don\'t Need',
+    status: "Don't Need",
     price: 1.29,
   },
     {
